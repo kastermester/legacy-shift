@@ -1,0 +1,16 @@
+{
+  "name": "Shift",
+  "version": "0.1.0",
+  "description": "A framework for displaying data, written using ReactJS",
+  "author": {
+    "name": "Kaare Skovgaard",
+    "email": "kaare@kaareskovgaard.net"
+  },
+  "devDependencies": {
+    "serve": "=1.4.0",
+    "gulp": "=3.6.2",
+    "gulp-concat": "=2.2.0"
+  },
+  "dependencies": {
+  }
+}
