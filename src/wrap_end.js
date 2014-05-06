@@ -1,3 +1,4 @@
+return Shift;
 });
 
 if (typeof define === "function" && define.amd) {
