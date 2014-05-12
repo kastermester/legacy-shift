@@ -1,33 +1,45 @@
-utils.templateHelper = function(template, fieldNames, categoryForField, templateMap){
+utils.templateHelper = function(template, fieldNames, categories, templateMap){
 	// First replace all fields that are stated explicitly in the template
-	var explicitFields = [];
-	var explicitCategories = [];
-	var replacedFields = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, template, templateMap);
+	var explicitFields = {};
+	var explicitCategories = {};
+	var hasImplicitCategories = false;
+	var replacedFields = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, template, templateMap, null, function(){
+		hasImplicitCategories = true;
+	});
 
 	// Find every field that was not explicitly stated and mark them as implicit
 	var implicitFields = [];
 	var implicitCategories = [];
 
-	var categories = {};
-	for(var i in fieldNames){
-		var fieldName = fieldNames[i];
-		if(explicitFields.indexOf(fieldName) < 0){
-			var categoryName = categoryForField(fieldName);
 
-			if(categoryName){
-				var category = categories[categoryName];
+	if(!hasImplicitCategories){
+		for(var i in fieldNames){
+			var fieldName = fieldNames[i];
 
-				if(!category){
-					category = categories[categoryName] = [];
-				}
-
-				if(explicitCategories.indexOf(categoryName) < 0 && implicitCategories.indexOf(categoryName) < 0){
-					implicitCategories.push(categoryName);
-				}
-
-				category.push(fieldName);
-			} else {
+			if(!explicitFields[fieldNames]){
 				implicitFields.push(fieldName);
+			}
+		}
+	} else {
+		// We can have both fields without a category, and fields with a category, loop through all the explicit categories and add an exlusion map
+		var fieldsInCategories = {};
+		for(var category in categories){
+
+			if(!explicitCategories[category]){
+				implicitCategories.push(category);
+			}
+
+			var fields = categories[category];
+			fields.forEach(function(field){
+				fieldsInCategories[field] = true;
+			});
+		}
+
+		for(var i in fieldNames){
+			var field = fieldNames[i];
+
+			if(!fieldsInCategories[field]){
+				implicitFields.push(field);
 			}
 		}
 	}
@@ -49,7 +61,7 @@ utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, chi
 	return clone;
 };
 
-utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, reactNode, templateMap, explicitFieldName){
+utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, reactNode, templateMap, explicitFieldName, callOnImplicitCategories){
 	var fieldName;
 	if(Shift.FieldsFor.type == reactNode.type){
 		return reactNode;
@@ -58,7 +70,9 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 	if(Shift.CategoryFor.type == reactNode.type){
 		var categoryName = reactNode.props.category;
 		if(categoryName){
-			explicitCategories.push(categoryName);
+			explicitCategories[categoryName] = true;
+		} else {
+			callOnImplicitCategories.call(undefined);
 		}
 	}
 
@@ -75,7 +89,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 			} else {
 				fieldName = reactNode.props.field;
 			}
-			explicitFields.push(fieldName);
+			explicitFields[fieldName] = true;
 			return handler(fieldName, reactNode);
 		}
 	}
@@ -87,10 +101,10 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 	} else if(Array.isArray(reactNode.props.children)){
 		var children = [];
 		React.Children.forEach(reactNode.props.children, function(child){
-			children.push(utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, child, templateMap, explicitFieldName));
+			children.push(utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, child, templateMap, explicitFieldName, callOnImplicitCategories));
 		});
 	} else if(reactNode.props.children != null) {
-		children = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, reactNode.props.children, templateMap, explicitFieldName);
+		children = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, reactNode.props.children, templateMap, explicitFieldName, callOnImplicitCategories);
 	}
 
 	return utils.templateHelper.cloneNodeWithNewProperties(reactNode, reactNode.props, children);
@@ -106,7 +120,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			var result = [];
 
 			React.Children.forEach(reactNode.props.children, function(child){
-				result.push(utils.templateHelper.replaceExplicitFields([], [], child, templateMap, field));
+				result.push(utils.templateHelper.replaceExplicitFields({}, {}, child, templateMap, field, function(){}));
 			});
 
 			return result;

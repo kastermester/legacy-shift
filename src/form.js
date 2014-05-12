@@ -7,19 +7,32 @@ Shift.Form = React.createClass({
 			onSubmit: React.PropTypes.function,
 			onChange: React.PropTypes.function,
 			onFieldInFocusChange: React.PropTypes.function
-		})
+		}),
+		fields: React.PropTypes.arrayOf(React.PropTypes.string)
 	},
 	getDefaultProps: function(){
 		return {
-			idPrefix: 'form-'
+			idPrefix: 'form-',
+			locale: 'en_US'
 		};
+	},
+	translate: function(msg){
+		if(typeof(msg) == 'string'){
+			return msg;
+		}
+
+		if(typeof(msg) == 'object'){
+			return msg[this.props.locale];
+		}
+
+		throw new Error("Message must either be a string or a map from locale to a string");
 	},
 	getInitialState: function(){
 		var values = {};
 
 		var initialValue = this.props.initialValue || {};
 
-		for(var key in this.props.fields){
+		for(var key in this.props.schema){
 			values[key] = initialValue[key];
 		}
 
@@ -34,7 +47,7 @@ Shift.Form = React.createClass({
 	getEmptyFieldErrors: function(){
 		var result = {};
 
-		for(var key in this.props.fields){
+		for(var key in this.props.schema){
 			result[key] = {};
 		}
 
@@ -50,14 +63,14 @@ Shift.Form = React.createClass({
 		// we need a synchronous way of reading the state
 		this.fieldErrors = this.getEmptyFieldErrors();
 
-		for(var field in this.props.fields){
+		for(var field in this.props.schema){
 			this.validators[field] = [];
 			this.validatorsDependingOnField[field] = [];
 			this.validatorsWithDependencies[field] = [];
 		}
 
-		for(var field in this.props.fields){
-			var schema = this.props.fields[field];
+		for(var field in this.props.schema){
+			var schema = this.props.schema[field];
 			if(schema.validators instanceof Array){
 				var validators = this.normalizeValidators(schema.validators);
 				for(var i in validators){
@@ -82,16 +95,25 @@ Shift.Form = React.createClass({
 	},
 
 	defaultTemplate: function(canSubmit, submit, form){
-		return [Shift.CategoryFor({}, React.DOM.fieldset({}, [
-			Shift.CategoryNameFor({tagName: 'legend'}),
+		return [
 			Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
 				errorClassName: 'validation-error'
 			}, [
 				Shift.LabelFor(),
 				Shift.EditorFor(),
 				Shift.ValidationMessageFor()
-			]))
-		])), React.DOM.input({type: 'submit', 'disabled': !canSubmit, value: 'Go!'})];
+			])),
+			Shift.CategoryFor({}, React.DOM.fieldset({}, [
+				Shift.CategoryNameFor({tagName: 'legend'}),
+				Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
+					errorClassName: 'validation-error'
+				}, [
+					Shift.LabelFor(),
+					Shift.EditorFor(),
+					Shift.ValidationMessageFor()
+				]))
+			])
+			), React.DOM.input({type: 'submit', 'disabled': !canSubmit, value: 'Go!'})];
 	},
 
 	getTemplate: function(){
@@ -121,19 +143,7 @@ Shift.Form = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		var fieldNames = [];
-
-		for(var field in this.props.fields){
-			fieldNames.push(field);
-		}
-
-		var categoryForField = function(fieldName){
-			var field = that.props.fields[fieldName];
-
-			return field.category;
-		}
-
-		return utils.templateHelper(template, fieldNames, categoryForField, templateMap);
+		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.schema), this.props.categories || {}, templateMap);
 	},
 
 	isFieldValid: function(fieldName){
@@ -149,7 +159,7 @@ Shift.Form = React.createClass({
 			return '';
 		}
 
-		return err[keys[0]];
+		return this.translate(err[keys[0]]);
 	},
 	generateEditorId: function(fieldName){
 		return this.props.idPrefix + fieldName;
@@ -160,8 +170,8 @@ Shift.Form = React.createClass({
 
 		result.push(Shift.EditorFor);
 		result.push(function(fieldName, reactNode){
-			var field = that.props.fields[fieldName];
-			return field.editor(utils.extend({}, field.editorProps, {
+			var field = that.props.schema[fieldName];
+			return utils.unwrapEditor(field.editor)(utils.extend({}, field.editorProps, {
 				ref: 'field.editor.'+fieldName,
 				key: 'field.editor.'+fieldName,
 				value: that.state.values[fieldName],
@@ -170,6 +180,7 @@ Shift.Form = React.createClass({
 					reactNode.props.errorClassName,
 					that.isFieldValid(fieldName)
 				),
+				locale: that.props.locale,
 				editorId: that.generateEditorId(fieldName),
 				events: {
 					onChange: function(oldValue, newValue){
@@ -187,13 +198,18 @@ Shift.Form = React.createClass({
 
 		result.push(Shift.LabelFor);
 		result.push(function(fieldName, reactNode){
-			var field = that.props.fields[fieldName];
+			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
 			var errorClassName = reactNode.props.errorClassName;
+			var label = field.label;
+
+			if (field.editorLabel){
+				label = field.editorLabel;
+			}
 			return Shift.Label({
 				tagName: tagName,
-				text: field.label,
+				text: that.translate(label),
 				editorId: that.generateEditorId(fieldName),
 				className: utils.mergeClassNames(
 					className,
@@ -342,7 +358,7 @@ Shift.Form = React.createClass({
 		// and in an array containing all validations
 
 		// This allows for use of the async utils whenAll and awaitAll to orchestrate the entire process
-		for(var field in this.props.fields){
+		for(var field in this.props.schema){
 			(function(field){
 				var simpleFieldPromise = this.validateSimpleFieldValidations(field, values, fieldErrors);
 				allValidations.push(simpleFieldPromise);
@@ -350,7 +366,7 @@ Shift.Form = React.createClass({
 			}).call(this, field);
 		}
 
-		for(field in this.props.fields){
+		for(field in this.props.schema){
 			(function(field){
 				var nonSimpleValidators = that.validatorsWithDependencies[field];
 				if(nonSimpleValidators.length > 0){
@@ -526,7 +542,7 @@ Shift.Form = React.createClass({
 	},
 
 	focus: function(fieldName){
-		if(fieldName in this.props.fields){
+		if(fieldName in this.props.schema){
 			var field = this.refs['field.editor.'+fieldName];
 			field.focus();
 		}

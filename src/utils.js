@@ -220,4 +220,18 @@ var utils = Shift.utils = {
 
 		return result.join(' ');
 	},
+	unwrapEditor: function(editor){
+		if (typeof(editor) == 'string'){
+			return Shift.Editors[editor];
+		}
+
+		return editor;
+	},
+	unwrapPresenter: function(presenter){
+		if (typeof(presenter) == 'string'){
+			return Shift.Presenters[presenter];
+		}
+
+		return presenter;
+	}
 };

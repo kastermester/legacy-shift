@@ -2,14 +2,42 @@ Shift.PresenterFor = React.createClass({render: function(){throw new Error("Shou
 
 Shift.Presenter = React.createClass({
 	defaultTemplate: function(canSubmit, submit, form){
-		return React.DOM.div({}, [Shift.CategoryFor({}, React.DOM.fieldset({}, [
-			Shift.CategoryNameFor({tagName: 'legend'}),
+		return React.DOM.div({}, [
 			Shift.FieldsFor({}, React.DOM.div({}, [
 				Shift.TitleFor(),
 				React.DOM.span(null, ': '),
-				Shift.PresenterFor(),
+				Shift.PresenterFor()
+			])),
+			Shift.CategoryFor({}, React.DOM.fieldset({}, [
+				Shift.CategoryNameFor({tagName: 'legend'}),
+				Shift.FieldsFor({}, React.DOM.div({}, [
+					Shift.TitleFor(),
+					React.DOM.span(null, ': '),
+					Shift.PresenterFor()
+				]))
 			]))
-		]))]);
+		]);
+	},
+	getPropTypes: function(){
+		return {
+			fields: React.PropTypes.arrayOf(React.PropTypes.string)
+		};
+	},
+	getDefaultProps: function(){
+		return {
+			locale: 'en_US'
+		};
+	},
+	translate: function(msg){
+		if(typeof(msg) == 'string'){
+			return msg;
+		}
+
+		if(typeof(msg) == 'object'){
+			return msg[this.props.locale];
+		}
+
+		throw new Error("Message must either be a string or a map from locale to a string");
 	},
 	getTemplate: function(){
 		var template = this.props.template || this.defaultTemplate;
@@ -21,19 +49,7 @@ Shift.Presenter = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		var fieldNames = [];
-
-		for(var field in this.props.fields){
-			fieldNames.push(field);
-		}
-
-		var categoryForField = function(fieldName){
-			var field = that.props.fields[fieldName];
-
-			return field.category;
-		};
-
-		return utils.templateHelper(template, fieldNames, categoryForField, templateMap);
+		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.value), this.props.categories || {}, templateMap);
 	},
 	getTemplateMap: function(){
 		var that = this;
@@ -41,22 +57,23 @@ Shift.Presenter = React.createClass({
 
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode){
-			var field = that.props.fields[fieldName];
-			return field.presenter(utils.extend({}, field.presenterProps, {
+			var field = that.props.schema[fieldName];
+			return utils.unwrapPresenter(field.presenter)(utils.extend({}, field.presenterProps, {
 				key: 'field.presenter.'+fieldName,
-				value: that.props.values[fieldName],
-				className: reactNode.props.className
+				value: that.props.value[fieldName],
+				className: reactNode.props.className,
+				locale: that.props.locale
 			}));
 		});
 
 		result.push(Shift.TitleFor);
 		result.push(function(fieldName, reactNode){
-			var field = that.props.fields[fieldName];
+			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
 			return Shift.Title({
 				tagName: tagName,
-				text: field.label,
+				text: that.translate(field.label),
 				className: className
 			});
 		});
