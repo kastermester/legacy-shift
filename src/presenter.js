@@ -39,6 +39,15 @@ Shift.Presenter = React.createClass({
 
 		throw new Error("Message must either be a string or a map from locale to a string");
 	},
+	translateCategoryName: function(category){
+		if(this.props.categoryTranslations){
+			if(this.props.categoryTranslations[this.props.locale]){
+				return this.props.categoryTranslations[this.props.locale][category];
+			}
+		}
+
+		return category;
+	},
 	getTemplate: function(){
 		var template = this.props.template || this.defaultTemplate;
 		return template(this);
@@ -49,7 +58,9 @@ Shift.Presenter = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.value), this.props.categories || {}, templateMap);
+		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.value), this.props.categories || {}, function(category){
+			return that.translateCategoryName(category);
+		}, templateMap);
 	},
 	getTemplateMap: function(){
 		var that = this;

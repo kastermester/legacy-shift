@@ -27,6 +27,15 @@ Shift.Form = React.createClass({
 
 		throw new Error("Message must either be a string or a map from locale to a string");
 	},
+	translateCategoryName: function(category){
+		if(this.props.categoryTranslations){
+			if(this.props.categoryTranslations[this.props.locale]){
+				return this.props.categoryTranslations[this.props.locale][category];
+			}
+		}
+
+		return category;
+	},
 	getInitialState: function(){
 		var values = {};
 
@@ -143,7 +152,9 @@ Shift.Form = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.schema), this.props.categories || {}, templateMap);
+		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.schema), this.props.categories || {}, function(category){
+			return that.translateCategoryName(category);
+		}, templateMap);
 	},
 
 	isFieldValid: function(fieldName){
@@ -253,7 +264,9 @@ Shift.Form = React.createClass({
 					that.isFieldValid(fieldName)
 				)
 			}, reactNode.props.children.map(function(child){
-				return utils.templateHelper.replaceExplicitFields([], [], child, result, fieldName);
+				return utils.templateHelper.replaceExplicitFields([], [], function(category){
+					return that.translateCategoryName(category);
+				}, child, result, fieldName);
 			}));
 		});
 
