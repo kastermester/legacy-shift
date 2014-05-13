@@ -2,6 +2,7 @@ Shift.EditorFor = React.createClass({render: function(){throw new Error("Should 
 Shift.ValidationMessageFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
 
 Shift.Form = React.createClass({
+	mixins: [Shift.Mixins.events],
 	propTypes: {
 		events: React.PropTypes.shape({
 			onSubmit: React.PropTypes.function,
@@ -315,14 +316,6 @@ Shift.Form = React.createClass({
 		}
 
 		return false;
-	},
-	triggerEvent: function(name, args){
-		if(this.props.events != null){
-			if(typeof(this.props.events[name]) == 'function'){
-				return this.props.events[name].apply(this.props.eventHandlerContext || undefined, args);
-			}
-		}
-		return null;
 	},
 
 	getValue: function(){

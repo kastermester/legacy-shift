@@ -11,7 +11,7 @@ var editorFiles = ['text.js'].map(function(f){
 var presenterFiles = ['text.js'].map(function(f){
 	return path.join('presenters', f);
 });
-var files = ['wrap_begin.js', 'utils.js', 'templatehelper.js', 'promise.js', 'validator.js', 'editor.js', 'presenters.js'].concat(
+var files = ['wrap_begin.js', 'utils.js', 'templatehelper.js', 'promise.js', 'validator.js', 'mixins.js', 'editor.js', 'presenters.js'].concat(
 	validatorFiles, editorFiles, presenterFiles,
 	['label.js', 'title.js', 'validationclassstatus.js', 'form.js', 'presenter.js', 'wrap_end.js']
 );

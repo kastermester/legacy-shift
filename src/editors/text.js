@@ -1,4 +1,5 @@
 Shift.Editors.Text = React.createClass({
+	mixins: [Shift.Mixins.events],
 	getDefaultProps: function(){
 		return {
 			value: '',
@@ -27,20 +28,9 @@ Shift.Editors.Text = React.createClass({
 		});
 	},
 
-	triggerEvent: function(name, args){
-		if(this.props.events != null){
-			if(typeof(this.props.events[name]) == 'function'){
-				this.props.events[name].apply(undefined, args);
-			}
-		}
-	},
-
 	valueChanged: function(){
 		var oldValue = this.props.value;
 		var newValue = this.refs.field.getDOMNode().value;
-		this.setState({
-			value: newValue
-		});
 
 		this.triggerEvent('onChange', [oldValue, newValue]);
 	},
