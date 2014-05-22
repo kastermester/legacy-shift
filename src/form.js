@@ -2,7 +2,7 @@ Shift.EditorFor = React.createClass({render: function(){throw new Error("Should 
 Shift.ValidationMessageFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
 
 Shift.Form = React.createClass({
-	mixins: [Shift.Mixins.events],
+	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
 	propTypes: {
 		events: React.PropTypes.shape({
 			onSubmit: React.PropTypes.function,
@@ -14,19 +14,9 @@ Shift.Form = React.createClass({
 	getDefaultProps: function(){
 		return {
 			idPrefix: 'form-',
-			locale: 'en_US'
+			locale: 'en_US',
+			context: null
 		};
-	},
-	translate: function(msg){
-		if(typeof(msg) == 'string'){
-			return msg;
-		}
-
-		if(typeof(msg) == 'object'){
-			return msg[this.props.locale];
-		}
-
-		throw new Error("Message must either be a string or a map from locale to a string");
 	},
 	translateCategoryName: function(category){
 		if(this.props.categoryTranslations){
@@ -192,6 +182,7 @@ Shift.Form = React.createClass({
 					reactNode.props.errorClassName,
 					that.isFieldValid(fieldName)
 				),
+				context: that.props.context,
 				locale: that.props.locale,
 				editorId: that.generateEditorId(fieldName),
 				events: {
@@ -234,7 +225,7 @@ Shift.Form = React.createClass({
 		result.push(Shift.ValidationMessageFor);
 		result.push(function(fieldName, reactNode){
 			var className = reactNode.props.className;
-			var tagName = reactNode.props.tagName;
+			var tagName = reactNode.props.tagName ? reactNode.props.tagName : 'span';
 			var errorClassName = reactNode.props.errorClassName;
 			var isValid = that.isFieldValid(fieldName);
 			var msg = that.getFieldErrorMessage(fieldName);

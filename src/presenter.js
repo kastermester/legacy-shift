@@ -1,6 +1,7 @@
 Shift.PresenterFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
 
 Shift.Presenter = React.createClass({
+	mixins: [Shift.Mixins.translate],
 	defaultTemplate: function(canSubmit, submit, form){
 		return React.DOM.div({}, [
 			Shift.FieldsFor({}, React.DOM.div({}, [
@@ -25,19 +26,9 @@ Shift.Presenter = React.createClass({
 	},
 	getDefaultProps: function(){
 		return {
-			locale: 'en_US'
+			locale: 'en_US',
+			context: null
 		};
-	},
-	translate: function(msg){
-		if(typeof(msg) == 'string'){
-			return msg;
-		}
-
-		if(typeof(msg) == 'object'){
-			return msg[this.props.locale];
-		}
-
-		throw new Error("Message must either be a string or a map from locale to a string");
 	},
 	translateCategoryName: function(category){
 		if(this.props.categoryTranslations){
@@ -73,7 +64,8 @@ Shift.Presenter = React.createClass({
 				key: 'field.presenter.'+fieldName,
 				value: that.props.value[fieldName],
 				className: reactNode.props.className,
-				locale: that.props.locale
+				locale: that.props.locale,
+				context: that.props.context
 			}));
 		});
 

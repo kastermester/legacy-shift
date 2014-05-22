@@ -4,7 +4,9 @@ Shift.Editors.Text = React.createClass({
 		return {
 			value: '',
 			className: '',
-			disabled: false
+			extraClassName: '',
+			disabled: false,
+			placeholderText: ''
 		};
 	},
 	getInitialState: function(){
@@ -21,9 +23,10 @@ Shift.Editors.Text = React.createClass({
 			onFocus: this.fieldFocused,
 			onBlur: this.fieldBlurred,
 			maxLength: this.props.maxLength,
-			className: this.props.className,
+			className: utils.mergeClassNames(this.props.className, this.props.extraClassName),
 			tabIndex: this.props.tabIndex,
 			disabled: this.props.disabled || !this.state.enabled,
+			placeholder: this.props.placeholderText,
 			id: this.props.editorId
 		});
 	},

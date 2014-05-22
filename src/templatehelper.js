@@ -16,7 +16,7 @@ utils.templateHelper = function(template, fieldNames, categories, convertCategor
 		for(var i in fieldNames){
 			var fieldName = fieldNames[i];
 
-			if(!explicitFields[fieldNames]){
+			if(!explicitFields[fieldName]){
 				implicitFields.push(fieldName);
 			}
 		}
