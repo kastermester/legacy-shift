@@ -89,8 +89,29 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 			} else {
 				fieldName = reactNode.props.field;
 			}
-			explicitFields[fieldName] = true;
-			return handler(fieldName, reactNode);
+			if(fieldName !== undefined){
+				explicitFields[fieldName] = true;
+			}
+			var result = handler(fieldName, reactNode);
+
+			if(result === null){
+				return null;
+			}
+
+			if(Array.isArray(result)){
+				var replaced = [];
+
+				result.forEach(function(node){
+					var n = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, node, templateMap, explicitFieldName, callOnImplicitCategories)
+					if(n !== null){
+						replaced.push(n);
+					}
+				});
+
+				return replaced;
+			}
+
+			return utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, result, templateMap, explicitFieldName, callOnImplicitCategories);
 		}
 	}
 
@@ -101,7 +122,10 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 	} else if(Array.isArray(reactNode.props.children)){
 		var children = [];
 		React.Children.forEach(reactNode.props.children, function(child){
-			children.push(utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, child, templateMap, explicitFieldName, callOnImplicitCategories));
+			var renderedChild = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, child, templateMap, explicitFieldName, callOnImplicitCategories)
+			if(renderedChild !== null){
+				children.push(renderedChild);
+			}
 		});
 	} else if(reactNode.props.children != null) {
 		children = utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, reactNode.props.children, templateMap, explicitFieldName, callOnImplicitCategories);
@@ -120,7 +144,10 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			var result = [];
 
 			React.Children.forEach(reactNode.props.children, function(child){
-				result.push(utils.templateHelper.replaceExplicitFields({}, {}, convertCategoryName, child, templateMap, field, function(){}));
+				var renderedChild = utils.templateHelper.replaceExplicitFields({}, {}, convertCategoryName, child, templateMap, field, function(){});
+				if(renderedChild !== null){
+					result.push(renderedChild);
+				}
 			});
 
 			return result;
@@ -133,7 +160,10 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 		if(category){
 			var result = [];
 			React.Children.forEach(reactNode.props.children, function(child){
-				utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category);
+				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category);
+				if(renderedChild !== null){
+					result.push(renderedChild);
+				}
 			});
 
 			return result;
@@ -143,7 +173,10 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			var result = [];
 
 			React.Children.forEach(reactNode.props.children, function(child){
-				result.push(utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category));
+				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category);
+				if(renderedChild !== null){
+					result.push(renderedChild);
+				}
 			});
 
 			return result;

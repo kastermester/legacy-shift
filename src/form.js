@@ -511,11 +511,14 @@ Shift.Form = React.createClass({
 		this.setFieldError(field, sourceValidator, null, value);
 	},
 	fieldFocused: function(fieldName){
-		this.setState({
-			fieldInFocus: fieldName
-		});
+		var oldFieldInFocus = this.state.fieldInFocus
+		if(fieldName != oldFieldInFocus){
+			this.setState({
+				fieldInFocus: fieldName
+			});
 
-		this.triggerEvent('onFieldInFocusChange', [fieldName]);
+			this.triggerEvent('onFieldInFocusChange', [fieldName]);
+		}
 	},
 	fieldBlurred: function(fieldName){
 		var that = this;

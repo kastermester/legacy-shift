@@ -1,4 +1,6 @@
 Shift.PresenterFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.IfNonEmptyValueFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.IfEmptyValueFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
 
 Shift.Presenter = React.createClass({
 	mixins: [Shift.Mixins.translate],
@@ -49,9 +51,11 @@ Shift.Presenter = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.value), this.props.categories || {}, function(category){
+		var result = utils.templateHelper(template, this.props.fields || Object.keys(this.props.value), this.props.categories || {}, function(category){
 			return that.translateCategoryName(category);
 		}, templateMap);
+
+		return result;
 	},
 	getTemplateMap: function(){
 		var that = this;
@@ -79,6 +83,26 @@ Shift.Presenter = React.createClass({
 				text: that.translate(field.label),
 				className: className
 			});
+		});
+
+		result.push(Shift.IfNonEmptyValueFor);
+		result.push(function(fieldName, reactNode){
+			var fieldValue = that.props.value[fieldName];
+			if(utils.isEmptyValue(fieldValue)){
+				return null;
+			}
+
+			return reactNode.props.children;
+		});
+
+		result.push(Shift.IfEmptyValueFor);
+		result.push(function(fieldName, reactNode){
+			var fieldValue = that.props.value[fieldName];
+			if(utils.isEmptyValue(fieldValue)){
+				return reactNode.props.children;
+			}
+
+			return null;
 		});
 
 		return result;
