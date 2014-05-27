@@ -145,9 +145,7 @@ var utils = Shift.utils = {
 		for(var i = 1, n = arguments.length; i < n; i++){
 			var obj = arguments[i];
 			for(var key in obj){
-				if(obj.hasOwnProperty(key)){
-					dst[key] = obj[key];
-				}
+				dst[key] = obj[key];
 			}
 		}
 

@@ -137,13 +137,53 @@ Shift.Form = React.createClass({
 			return new Shift.Validator(type, params, dependencies);
 		});
 	},
+	getFields: function(){
+		var fields = this.props.fields || Object.keys(this.props.schema);
+
+		var result = [];
+
+		for(var i in fields){
+			var field = fields[i];
+
+			if(this.props.schema[field].editor){
+				result.push(field);
+			}
+		}
+
+		return result;
+	},
+	getCategories: function(){
+		var categories = this.props.categories || {};
+
+		var result = {};
+
+		for(var categoryName in categories){
+			var fieldNames = categories[categoryName];
+
+			var fields = [];
+
+			for(var i in fields){
+				var field = fields[i];
+
+				if(this.props.schema[field].editor){
+					fields.push(field);
+				}
+			}
+
+			if(fields.length > 0){
+				result[categoryName] = fields;
+			}
+		}
+
+		return result;
+	},
 	render: function(){
 		var that = this;
 		var template = this.getTemplate();
 
 		var templateMap = this.getTemplateMap();
 
-		return utils.templateHelper(template, this.props.fields || Object.keys(this.props.schema), this.props.categories || {}, function(category){
+		return utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
 			return that.translateCategoryName(category);
 		}, templateMap);
 	},
