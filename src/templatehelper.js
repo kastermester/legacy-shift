@@ -31,14 +31,16 @@ utils.templateHelper = function(template, fieldNames, categories, convertCategor
 
 			var fields = categories[category];
 			fields.forEach(function(field){
-				fieldsInCategories[field] = true;
+				if(!explicitFields[field]){
+					fieldsInCategories[field] = true;
+				}
 			});
 		}
 
 		for(var i in fieldNames){
 			var field = fieldNames[i];
 
-			if(!fieldsInCategories[field]){
+			if(!fieldsInCategories[field] && !explicitFields[field]){
 				implicitFields.push(field);
 			}
 		}
@@ -49,16 +51,7 @@ utils.templateHelper = function(template, fieldNames, categories, convertCategor
 };
 
 utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, children){
-	// This seems weird, but basicly we mimic what the normal constructor
-	// react uses does to create a copy of the node
-	var clone = new node.constructor();
-
-	var newProperties = utils.extend({}, properties);
-	delete newProperties.children;
-
-	clone.construct.call(clone, newProperties, children);
-
-	return clone;
+	return new node.constructor(properties, children);
 };
 
 utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, convertCategoryName, reactNode, templateMap, explicitFieldName, callOnImplicitCategories){

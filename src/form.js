@@ -7,15 +7,20 @@ Shift.Form = React.createClass({
 		events: React.PropTypes.shape({
 			onSubmit: React.PropTypes.function,
 			onChange: React.PropTypes.function,
-			onFieldInFocusChange: React.PropTypes.function
+			onFieldInFocusChange: React.PropTypes.function,
+			onSubmitBegin: React.PropTypes.function,
+			onSubmitEnd: React.PropTypes.function
 		}),
-		fields: React.PropTypes.arrayOf(React.PropTypes.string)
+		fields: React.PropTypes.arrayOf(React.PropTypes.string),
+		submitButtonId: React.PropTypes.string
 	},
 	getDefaultProps: function(){
 		return {
+			initialValue: {},
 			idPrefix: 'form-',
 			locale: 'en_US',
-			context: null
+			context: null,
+			submitButtonId: null
 		};
 	},
 	translateCategoryName: function(category){
@@ -28,19 +33,11 @@ Shift.Form = React.createClass({
 		return category;
 	},
 	getInitialState: function(){
-		var values = {};
-
-		var initialValue = this.props.initialValue || {};
-
-		for(var key in this.props.schema){
-			values[key] = initialValue[key];
-		}
-
 		return {
 			fieldInFocus: null,
-			values: values,
 			fieldErrors: this.getEmptyFieldErrors(),
-			submittedOnce: false
+			submittedOnce: false,
+			presenterValues: this.props.initialValue || {}
 		};
 	},
 
@@ -54,7 +51,14 @@ Shift.Form = React.createClass({
 		return result;
 	},
 
+	addArtificialRef: function(fieldName, ref){
+		this.artificialRefs[fieldName] = ref;
+	},
+	removeArtificialRef: function(fieldName){
+		delete this.artificialRefs[fieldName];
+	},
 	componentWillMount: function(){
+		this.artificialRefs = {}
 		this.validators = {};
 		this.validatorsWithDependencies = {};
 		this.validatorsDependingOnField = {};
@@ -94,32 +98,46 @@ Shift.Form = React.createClass({
 		this.fieldErrors = null;
 	},
 
-	defaultTemplate: function(canSubmit, submit, form){
-		return [
+	defaultTemplate: [Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
+			errorClassName: 'validation-error'
+		}, [
+			Shift.LabelFor(),
+			Shift.EditorFor(),
+			Shift.ValidationMessageFor()
+		])),
+		Shift.CategoryFor({}, React.DOM.fieldset({}, [
+			Shift.CategoryNameFor({tagName: 'legend'}),
 			Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
 				errorClassName: 'validation-error'
 			}, [
 				Shift.LabelFor(),
 				Shift.EditorFor(),
 				Shift.ValidationMessageFor()
-			])),
-			Shift.CategoryFor({}, React.DOM.fieldset({}, [
-				Shift.CategoryNameFor({tagName: 'legend'}),
-				Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
-					errorClassName: 'validation-error'
-				}, [
-					Shift.LabelFor(),
-					Shift.EditorFor(),
-					Shift.ValidationMessageFor()
-				]))
-			])
-			), React.DOM.input({type: 'submit', 'disabled': !canSubmit, value: 'Go!'})];
-	},
+			]))
+		]))
+	],
 
 	getTemplate: function(){
 		var canSubmit = !this.state.submitting //&& Object.keys(this.state.fieldErrors).length == 0;
 		var template = this.props.template || this.defaultTemplate;
-		return React.DOM.form({onSubmit: this.formSubmitted}, template.call(undefined, canSubmit, this.submit, this));
+		if(template instanceof Array){
+			template = template.slice(0);
+		} else {
+			template = [template];
+		}
+		// This button is here to enable the browsers default auto-submit form behavior
+		// Doing it in this odd fashion seems to be the only reliable way of getting it to work in all browsers
+		// even if there's no other submit button in the form. Safari won't accept a button with display:none
+		// and IE11 even fails with visibility hidden
+		template.push(React.DOM.input({type: 'submit', style:{
+			height:0,
+			width:0,
+			display:'inline',
+			margin: 0,
+			padding: 0,
+			borderWidth: 0
+		}}));
+		return React.DOM.form({onSubmit: this.formSubmitted}, template);
 	},
 	normalizeValidators: function(validators){
 		return validators.map(function(e){
@@ -206,17 +224,25 @@ Shift.Form = React.createClass({
 	generateEditorId: function(fieldName){
 		return this.props.idPrefix + fieldName;
 	},
+	getInitialFieldValue: function(fieldName){
+		var initialValue = this.props.initialValue || {};
+		return initialValue[fieldName];
+	},
+	getPresenterFieldValue: function(fieldName){
+		return this.state.presenterValues[fieldName];
+	},
 	getTemplateMap: function(){
 		var that = this;
 		var result = [];
 
+		var addArtificialRef = this.addArtificialRef;
+		var removeArtificialRef = this.removeArtificialRef;
+
 		result.push(Shift.EditorFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			return utils.unwrapEditor(field.editor)(utils.extend({}, field.editorProps, {
-				ref: 'field.editor.'+fieldName,
-				key: 'field.editor.'+fieldName,
-				value: that.state.values[fieldName],
+			var value = that.getInitialFieldValue(fieldName);
+			var opts = {
 				className: utils.mergeClassNames(
 					reactNode.props.className,
 					reactNode.props.errorClassName,
@@ -225,6 +251,7 @@ Shift.Form = React.createClass({
 				context: that.props.context,
 				locale: that.props.locale,
 				editorId: that.generateEditorId(fieldName),
+				submit: that.submit,
 				events: {
 					onChange: function(oldValue, newValue){
 						that.valueChanged(fieldName, oldValue, newValue);
@@ -236,7 +263,16 @@ Shift.Form = React.createClass({
 						that.fieldBlurred(fieldName);
 					}
 				}
-			}));
+			};
+			if (!utils.isEmptyValue(value)){
+				opts.initialValue = value;
+			}
+			return Shift.Editor({
+				fieldName: fieldName,
+				addRef: addArtificialRef,
+				removeRef: removeArtificialRef,
+				child: utils.unwrapEditor(field.editor)(utils.extend({}, field.editorProps, opts))
+			})
 		});
 
 		result.push(Shift.LabelFor);
@@ -302,6 +338,50 @@ Shift.Form = React.createClass({
 			}));
 		});
 
+		result.push(Shift.PresenterFor);
+		result.push(function(fieldName, reactNode){
+			var field = that.props.schema[fieldName];
+			return utils.unwrapPresenter(field.presenter)(utils.extend({}, field.presenterProps, {
+				key: 'field.presenter.'+fieldName,
+				value: that.getPresenterFieldValue(fieldName),
+				className: reactNode.props.className,
+				locale: that.props.locale,
+				context: that.props.context
+			}));
+		});
+
+		result.push(Shift.TitleFor);
+		result.push(function(fieldName, reactNode){
+			var field = that.props.schema[fieldName];
+			var tagName = reactNode.props.tagName;
+			var className = reactNode.props.className;
+			return Shift.Title({
+				tagName: tagName,
+				text: that.translate(field.label),
+				className: className
+			});
+		});
+
+		result.push(Shift.IfNonEmptyValueFor);
+		result.push(function(fieldName, reactNode){
+			var fieldValue = that.state.presenterValues[fieldName];
+			if(utils.isEmptyValue(fieldValue)){
+				return null;
+			}
+
+			return reactNode.props.children;
+		});
+
+		result.push(Shift.IfEmptyValueFor);
+		result.push(function(fieldName, reactNode){
+			var fieldValue = that.state.presenterValues[fieldName];
+			if(utils.isEmptyValue(fieldValue)){
+				return reactNode.props.children;
+			}
+
+			return null;
+		});
+
 		return result;
 	},
 
@@ -314,9 +394,26 @@ Shift.Form = React.createClass({
 		}
 	},
 
+	componentWillUpdate: function(nextProps, nextState){
+		if(nextState.submitting != this.state.submitting){
+			var submitButton = nextProps.submitButtonId ? document.getElementById(nextProps.submitButtonId) : null;
+			if(nextState.submitting){
+				if(submitButton){
+					submitButton.disabled = 'disabled';
+				}
+				this.triggerEvent('onSubmitBegin');
+			} else {
+				if(submitButton){
+					submitButton.removeAttribute("disabled");
+				}
+				this.triggerEvent('onSubmitEnd');
+			}
+		}
+	},
+
 	submit: function(){
 		var defer = Shift.defer();
-		var values = this.state.values;
+		var values = this.getValue();
 		var that = this;
 		this.setState({submitting: true, submittedOnce: true});
 		this.validate(values).then(function(){
@@ -350,22 +447,28 @@ Shift.Form = React.createClass({
 	},
 
 	getValue: function(){
-		return utils.extend({}, this.state.values);
+		var result = {};
+		for(var key in this.artificialRefs){
+			var editor = this.artificialRefs[key];
+			result[key] = editor.getValue();
+		}
+		return result;
 	},
 
 	setValue: function(values){
-		var toSet = utils.extend(this.state.values, values);
-		this.setState({
-			values: toSet
-		});
+		var value = utils.extend({}, this.state.presenterValues);
+		for(var key in values){
+			var editor = this.artificialRefs[key];
+			if(editor){
+				editor.setValue(values[key]);
+			}
+			value[key] = values[key];
+		}
 
-		return toSet;
+		this.setState({presenterValues: value});
 	},
 
 	valueChanged: function(field, oldValue, newValue){
-		var valueMap = {};
-		valueMap[field] = newValue;
-		var values = this.setValue(valueMap);
 		this.triggerEvent('onChange', arguments);
 	},
 	// This function is quite complex
@@ -380,7 +483,7 @@ Shift.Form = React.createClass({
 	//
 	validate: function(values, setFocusOnFail){
 		if(values == null){
-			values = this.state.values;
+			values = this.getValue();
 		}
 		if(setFocusOnFail == null){
 			setFocusOnFail = false;
@@ -551,14 +654,12 @@ Shift.Form = React.createClass({
 		this.setFieldError(field, sourceValidator, null, value);
 	},
 	fieldFocused: function(fieldName){
-		var oldFieldInFocus = this.state.fieldInFocus
+		// Not using state. I do not want to re-render the entire form to get to this
+		var oldFieldInFocus = this.fieldInFocus;
 		if(fieldName != oldFieldInFocus){
-			this.setState({
-				fieldInFocus: fieldName
-			});
-
 			this.triggerEvent('onFieldInFocusChange', [fieldName]);
 		}
+		this.fieldInFocus = fieldName;
 	},
 	fieldBlurred: function(fieldName){
 		var that = this;
@@ -572,10 +673,8 @@ Shift.Form = React.createClass({
 			if(that.state.submittedOnce){
 				//that.validateField(fieldName);
 			}
-			if(that.state.fieldInFocus == fieldName){
-				that.setState({
-					fieldInFocus: null
-				});
+			if(that.fieldInFocus == fieldName){
+				that.fieldInFocus = null;
 				that.triggerEvent('onFieldInFocusChange', [null]);
 			}
 		}, 0);
@@ -583,14 +682,14 @@ Shift.Form = React.createClass({
 
 	focus: function(fieldName){
 		if(fieldName in this.props.schema){
-			var field = this.refs['field.editor.'+fieldName];
+			var field = this.artificialRefs[fieldName];
 			field.focus();
 		}
 	},
 
 	blur: function(){
-		if(this.state.fieldInFocus != null){
-			this.refs['field.editor.'+this.state.fieldInFocus].blur();
+		if(this.fieldInFocus != null){
+			this.artificialRefs[this.fieldInFocus].blur();
 		}
 	}
 });

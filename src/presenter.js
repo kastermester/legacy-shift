@@ -4,23 +4,21 @@ Shift.IfEmptyValueFor = React.createClass({render: function(){throw new Error("S
 
 Shift.Presenter = React.createClass({
 	mixins: [Shift.Mixins.translate],
-	defaultTemplate: function(canSubmit, submit, form){
-		return React.DOM.div({}, [
+	defaultTemplate: React.DOM.div({}, [
+		Shift.FieldsFor({}, React.DOM.div({}, [
+			Shift.TitleFor(),
+			React.DOM.span(null, ': '),
+			Shift.PresenterFor()
+		])),
+		Shift.CategoryFor({}, React.DOM.fieldset({}, [
+			Shift.CategoryNameFor({tagName: 'legend'}),
 			Shift.FieldsFor({}, React.DOM.div({}, [
 				Shift.TitleFor(),
 				React.DOM.span(null, ': '),
 				Shift.PresenterFor()
-			])),
-			Shift.CategoryFor({}, React.DOM.fieldset({}, [
-				Shift.CategoryNameFor({tagName: 'legend'}),
-				Shift.FieldsFor({}, React.DOM.div({}, [
-					Shift.TitleFor(),
-					React.DOM.span(null, ': '),
-					Shift.PresenterFor()
-				]))
 			]))
-		]);
-	},
+		]))
+	]),
 	getPropTypes: function(){
 		return {
 			fields: React.PropTypes.arrayOf(React.PropTypes.string)
@@ -43,7 +41,7 @@ Shift.Presenter = React.createClass({
 	},
 	getTemplate: function(){
 		var template = this.props.template || this.defaultTemplate;
-		return template(this);
+		return template;
 	},
 	getFields: function(){
 		var fields = this.props.fields || Object.keys(this.props.schema);
