@@ -51,6 +51,11 @@ utils.templateHelper = function(template, fieldNames, categories, convertCategor
 };
 
 utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, children){
+	// Case to handle instances of React.__internals.TextComponent could test with React.__internals.TextComponent.type === node.type
+	// but that seems even more hacky than what this is already
+	if(typeof(properties) === 'string'){
+		return node;
+	}
 	return new node.constructor(properties, children);
 };
 
