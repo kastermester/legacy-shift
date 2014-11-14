@@ -207,15 +207,12 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 	}
 };
 
-Shift.FieldsFor = React.createClass({
-	displayName: 'ShiftFieldsFor',
+Shift.FieldsFor = ShiftFieldsFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.CategoryFor = React.createClass({
-	displayName: 'ShiftCategoryFor',
+Shift.CategoryFor = ShiftCategoryFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.CategoryNameFor = React.createClass({
-	displayName: 'ShiftCategoryName',
+Shift.CategoryNameFor = ShiftCategoryName = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });

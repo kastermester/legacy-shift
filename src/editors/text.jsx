@@ -1,5 +1,4 @@
-Shift.Editors.Text = React.createClass({
-	displayName: 'ShiftTextEditor',
+Shift.Editors.Text = ShiftTextEditor = React.createClass({
 	mixins: [Shift.Mixins.events],
 	getDefaultProps: function(){
 		return {

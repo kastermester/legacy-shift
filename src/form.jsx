@@ -1,14 +1,11 @@
-Shift.EditorFor = React.createClass({
-	displayName: 'ShiftEditorFor',
+Shift.EditorFor = ShiftEditorFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.ValidationMessageFor = React.createClass({
-	displayName: 'ShiftValidationMessageFor',
+Shift.ValidationMessageFor = ShiftValidationMessageFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
 
-Shift.Form = React.createClass({
-	displayName: 'ShiftForm',
+Shift.Form = ShiftForm = React.createClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
 	propTypes: {
 		events: React.PropTypes.shape({

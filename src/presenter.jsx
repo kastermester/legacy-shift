@@ -1,18 +1,14 @@
-Shift.PresenterFor = React.createClass({
-	displayName: 'ShiftPresenterFor',
+Shift.PresenterFor = ShiftPresenterFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.IfNonEmptyValueFor = React.createClass({
-	displayName: 'ShiftIfNonEmptyValueFor',
+Shift.IfNonEmptyValueFor = IfNonEmptyValueFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.IfEmptyValueFor = React.createClass({
-	displayName: 'ShiftIfEmptyValueFor',
+Shift.IfEmptyValueFor = ShiftIfEmptyValueFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
 
-Shift.Presenter = React.createClass({
-	displayName: 'ShiftPresenter',
+Shift.Presenter = ShiftPresenter = React.createClass({
 	mixins: [Shift.Mixins.translate],
 	defaultTemplate: React.DOM.div({}, [
 		Shift.FieldsFor({key: 'fields'}, React.DOM.div({}, [

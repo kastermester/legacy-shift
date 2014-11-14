@@ -1,8 +1,7 @@
-Shift.TitleFor = React.createClass({
-	displayName: 'ShiftTitleFor',
+Shift.TitleFor = ShiftTitleFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.Title = React.createClass({
+Shift.Title = ShiftTitle = React.createClass({
 	getDefaultProps: function() {
 		return {
 			tagName: 'span',
