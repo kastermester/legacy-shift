@@ -22,6 +22,10 @@ gulp.task('build', function(){
 	  .pipe(concat('shift.jsx'))
 	  .pipe(gulp.dest('js'))
 	  .pipe(react({harmony: true}))
+	  .on('error', function(e){
+	  	console.warn(e.message);
+	  	console.warn(e.stack);
+	  })
 	  .pipe(gulp.dest('js'));
 });
 
