@@ -10,21 +10,27 @@ Shift.IfEmptyValueFor = ShiftIfEmptyValueFor = React.createClass({
 
 Shift.Presenter = ShiftPresenter = React.createClass({
 	mixins: [Shift.Mixins.translate],
-	defaultTemplate: React.DOM.div({}, [
-		Shift.FieldsFor({key: 'fields'}, React.DOM.div({}, [
-			Shift.TitleFor({key: 'title'}),
-			React.DOM.span({key: 'separator'}, ': '),
-			Shift.PresenterFor({key: 'presenter'})
-		])),
-		Shift.CategoryFor({key: 'category'}, React.DOM.fieldset({key: 'fieldset'}, [
-			Shift.CategoryNameFor({key: 'category-name', tagName: 'legend'}),
-			Shift.FieldsFor({key: 'fields'}, React.DOM.div({}, [
-				Shift.TitleFor({key: 'title'}),
-				React.DOM.span({key: 'separator'}, ': '),
-				Shift.PresenterFor({key: 'presenter'})
-			]))
-		]))
-	]),
+	defaultTemplate: <div>
+		<ShiftFieldsFor key='fields'>
+			<div>
+				<ShiftTitleFor key='title' />
+				<span key='separator'>: </span>
+				<ShiftPresenterFor key='presenter' />
+			</div>
+		</ShiftFieldsFor>
+		<ShiftCategoryFor key='category'>
+			<fieldset key='fieldset'>
+				<ShiftCategoryNameFor key='category-name' tagName='legend' />
+				<ShiftFieldsFor key='fields'>
+					<div>
+						<ShiftTitleFor key='title' />
+						<span key='separator'>: </span>
+						<ShiftPresenterFor key='presenter' />
+					</div>
+				</ShiftFieldsFor>
+			</fieldset>
+		</ShiftCategoryFor>
+	</div>,
 	getPropTypes: function(){
 		return {
 			fields: React.PropTypes.arrayOf(React.PropTypes.string)
@@ -108,13 +114,13 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			return utils.unwrapPresenter(field.presenter)(utils.extend({}, field.presenterProps, {
+			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, field.presenterProps, {
 				key: 'presenter-'+fieldName,
 				value: that.props.value[fieldName],
 				className: reactNode.props.className,
 				locale: that.props.locale,
 				context: that.props.context
-			}));
+			})));
 		});
 
 		result.push(Shift.TitleFor);
@@ -122,12 +128,12 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
-			return Shift.Title({
-				key: 'title-' + fieldName,
-				tagName: tagName,
-				text: that.translate(field.label),
-				className: className
-			});
+			return <ShiftTitle
+				key={'title-' + fieldName}
+				tagName={tagName}
+				text={that.translate(field.label)}
+				className={className}
+			/>;
 		});
 
 		result.push(Shift.IfNonEmptyValueFor);

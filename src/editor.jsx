@@ -18,4 +18,4 @@ Shift.Editor = ShiftEditor = React.createClass({
 		delete props.removeRef;
 		return React.addons.cloneWithProps(this.props.child, props);
 	}
-})
+});

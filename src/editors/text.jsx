@@ -23,20 +23,20 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		}
 	},
 	render: function(){
-		return React.DOM.input({
-			type: "text",
-			ref: "field",
-			value: this.state.value,
-			onChange: this.valueChanged,
-			onFocus: this.fieldFocused,
-			onBlur: this.fieldBlurred,
-			maxLength: this.props.maxLength,
-			className: utils.mergeClassNames(this.props.className, this.props.extraClassName),
-			tabIndex: this.props.tabIndex,
-			disabled: this.props.disabled || !this.state.enabled,
-			placeholder: this.props.placeholderText,
-			id: this.props.editorId
-		});
+		return <input
+			type="text"
+			ref="field"
+			value={this.state.value}
+			onChange={this.valueChanged}
+			onFocus={this.fieldFocused}
+			onBlur={this.fieldBlurred}
+			maxLength={this.props.maxLength}
+			className={utils.mergeClassNames(this.props.className, this.props.extraClassName)}
+			tabIndex={this.props.tabIndex}
+			disabled={this.props.disabled || !this.state.enabled}
+			placeholder={this.props.placeholderText}
+			id={this.props.editorId}
+		/>;
 	},
 
 	setValue: function(value){

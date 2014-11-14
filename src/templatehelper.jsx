@@ -56,7 +56,16 @@ utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, chi
 	if(typeof(properties) === 'string'){
 		return node;
 	}
-	return React.addons.cloneWithProps(node, utils.extend({}, properties, {children: children}));
+
+	var extraProps = {
+		children: children
+	};
+
+	if (node.key){
+		extraProps.key = node.key;
+	}
+
+	return React.addons.cloneWithProps(node, utils.extend({}, properties, extraProps));
 };
 
 utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, convertCategoryName, reactNode, templateMap, explicitFieldName, callOnImplicitCategories){
@@ -213,6 +222,6 @@ Shift.FieldsFor = ShiftFieldsFor = React.createClass({
 Shift.CategoryFor = ShiftCategoryFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
-Shift.CategoryNameFor = ShiftCategoryName = React.createClass({
+Shift.CategoryNameFor = ShiftCategoryNameFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });

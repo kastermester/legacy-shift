@@ -6,8 +6,8 @@ Shift.Presenters.Text = ShiftTextPresenter = React.createClass({
 		};
 	},
 	render: function(){
-		return React.DOM.span({
-			className: this.props.className
-		},this.props.value);
+		return <span
+			className={this.props.className}
+		>{this.props.value}</span>;
 	},
 });

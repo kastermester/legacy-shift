@@ -102,25 +102,28 @@ Shift.Form = ShiftForm = React.createClass({
 		this.fieldErrors = null;
 	},
 
-	defaultTemplate: [Shift.FieldsFor({key: 'fields'}, Shift.ValidationClassStatusFor({
-			errorClassName: 'validation-error'
-		}, [
-			Shift.LabelFor({key: 'label'}),
-			Shift.EditorFor({key: 'editor'}),
-			Shift.ValidationMessageFor({key: 'validation'})
-		])),
-		Shift.CategoryFor({key: 'category'}, React.DOM.fieldset({}, [
-			Shift.CategoryNameFor({tagName: 'legend', key: 'category-name'}),
-			Shift.FieldsFor({key: 'fields'}, Shift.ValidationClassStatusFor({
-				errorClassName: 'validation-error',
-				key: 'validation'
-			}, [
-				Shift.LabelFor({key: 'label'}),
-				Shift.EditorFor({key: 'editor'}),
-				Shift.ValidationMessageFor({key: 'validation'})
-			]))
-		]))
-	],
+	defaultTemplate: [<ShiftFieldsFor key='fields'>
+		<ShiftValidationClassStatusFor errorClassName='validation-error'>
+			<ShiftLabelFor key='label' />
+			<ShiftEditorFor key='editor' />
+			<ShiftValidationMessageFor key='validation' />
+		</ShiftValidationClassStatusFor>
+		<ShiftCategoryFor key='category'>
+			<fieldset>
+				<ShiftCategoryNameFor tagName='legend' key='category-name' />
+				<ShiftFieldsFor key='fields'>
+					<ShiftValidationClassStatusFor
+						errorClassName='validation-error'
+						key='validation'
+					>
+						<ShiftLabelFor key='label' />
+						<ShiftEditorFor key='editor' />
+						<ShiftValidationMessageFor key='validation' />
+					</ShiftValidationClassStatusFor>
+				</ShiftFieldsFor>
+			</fieldset>
+		</ShiftCategoryFor>
+	</ShiftFieldsFor>],
 
 	getTemplate: function(){
 		var canSubmit = !this.state.submitting //&& Object.keys(this.state.fieldErrors).length == 0;
@@ -134,15 +137,15 @@ Shift.Form = ShiftForm = React.createClass({
 		// Doing it in this odd fashion seems to be the only reliable way of getting it to work in all browsers
 		// even if there's no other submit button in the form. Safari won't accept a button with display:none
 		// and IE11 even fails with visibility hidden
-		template.push(React.DOM.input({key: 'shift-submit', type: 'submit', style:{
+		template.push(<input key='shift-submit' type='submit' style={{
 			height:0,
 			width:0,
 			display:'inline',
 			margin: 0,
 			padding: 0,
 			borderWidth: 0
-		}}));
-		return React.DOM.form({onSubmit: this.formSubmitted}, template);
+		}} />);
+		return <form onSubmit={this.formSubmitted}>{template}</form>;
 	},
 	normalizeValidators: function(validators){
 		return validators.map(function(e){
@@ -272,13 +275,13 @@ Shift.Form = ShiftForm = React.createClass({
 			if (!utils.isEmptyValue(value)){
 				opts.initialValue = value;
 			}
-			return Shift.Editor({
-				fieldName: fieldName,
-				addRef: addArtificialRef,
-				removeRef: removeArtificialRef,
-				key: 'editor-' + fieldName,
-				child: utils.unwrapEditor(field.editor)(utils.extend({}, field.editorProps, opts))
-			})
+			return <ShiftEditor
+				fieldName={fieldName}
+				addRef={addArtificialRef}
+				removeRef={removeArtificialRef}
+				key={'editor-' + fieldName}
+				child={React.createElement(utils.unwrapEditor(field.editor), (utils.extend({}, field.editorProps, opts)))}
+			/>
 		});
 
 		result.push(Shift.LabelFor);
@@ -292,17 +295,17 @@ Shift.Form = ShiftForm = React.createClass({
 			if (field.editorLabel){
 				label = field.editorLabel;
 			}
-			return Shift.Label({
-				tagName: tagName,
-				text: that.translate(label),
-				editorId: that.generateEditorId(fieldName),
-				key: 'label-' + fieldName,
-				className: utils.mergeClassNames(
+			return <ShiftLabel
+				tagName={tagName}
+				text={that.translate(label)}
+				editorId={that.generateEditorId(fieldName)}
+				key={'label-' + fieldName}
+				className={utils.mergeClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
-				)
-			});
+				)}
+			/>;
 		});
 
 		result.push(Shift.ValidationMessageFor);
@@ -313,16 +316,16 @@ Shift.Form = ShiftForm = React.createClass({
 			var isValid = that.isFieldValid(fieldName);
 			var msg = that.getFieldErrorMessage(fieldName);
 
-			return Shift.Label({
-				tagName: tagName,
-				text: msg,
-				key: 'validation-message-' + fieldName,
-				className: utils.mergeClassNames(
+			return <ShiftLabel
+				tagName={tagName}
+				text={msg}
+				key={'validation-message-' + fieldName}
+				className={utils.mergeClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
-				)
-			});
+				)}
+			/>
 		});
 
 		result.push(Shift.ValidationClassStatusFor);
@@ -332,31 +335,33 @@ Shift.Form = ShiftForm = React.createClass({
 			var errorClassName = reactNode.props.errorClassName;
 			var isValid = that.isFieldValid(fieldName);
 
-			return Shift.ValidationClassStatus({
-				tagName: tagName,
-				key: 'validation-class-status-' + fieldName,
-				className: utils.mergeClassNames(
+			return <ShiftValidationClassStatus
+				tagName={tagName}
+				key={'validation-class-status-' + fieldName}
+				className={utils.mergeClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
-				)
-			}, reactNode.props.children.map(function(child){
-				return utils.templateHelper.replaceExplicitFields([], [], function(category){
-					return that.translateCategoryName(category);
-				}, child, result, fieldName);
-			}));
+				)}
+			>{
+				reactNode.props.children.map(function(child){
+					return utils.templateHelper.replaceExplicitFields([], [], function(category){
+						return that.translateCategoryName(category);
+					}, child, result, fieldName);
+				})
+			}</ShiftValidationClassStatus>;
 		});
 
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			return utils.unwrapPresenter(field.presenter)(utils.extend({}, field.presenterProps, {
+			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, field.presenterProps, {
 				key: 'presenter-'+fieldName,
 				value: that.getPresenterFieldValue(fieldName),
 				className: reactNode.props.className,
 				locale: that.props.locale,
 				context: that.props.context
-			}));
+			})));
 		});
 
 		result.push(Shift.TitleFor);
@@ -364,12 +369,12 @@ Shift.Form = ShiftForm = React.createClass({
 			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
-			return Shift.Title({
-				tagName: tagName,
-				key: 'title-' + fieldName,
-				text: that.translate(field.label),
-				className: className
-			});
+			return <ShiftTitle
+				tagName={tagName}
+				key={'title-' + fieldName}
+				text={that.translate(field.label)}
+				className={className}
+			/>;
 		});
 
 		result.push(Shift.IfNonEmptyValueFor);
