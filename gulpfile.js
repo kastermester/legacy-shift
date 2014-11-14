@@ -1,29 +1,32 @@
 var gulp = require('gulp');
-var path = require('path')
+var path = require('path');
+var react = require('gulp-react');
 
 var concat = require('gulp-concat');
-var validatorFiles = ['required.js', 'minlength.js', 'longerthan.js'].map(function(f){
+var validatorFiles = ['required.jsx', 'minlength.jsx', 'longerthan.jsx'].map(function(f){
 	return path.join('validators', f);
 });
-var editorFiles = ['text.js'].map(function(f){
+var editorFiles = ['text.jsx'].map(function(f){
 	return path.join('editors', f);
 });
-var presenterFiles = ['text.js'].map(function(f){
+var presenterFiles = ['text.jsx'].map(function(f){
 	return path.join('presenters', f);
 });
-var files = ['wrap_begin.js', 'utils.js', 'templatehelper.js', 'promise.js', 'validator.js', 'mixins.js', 'editor.js', 'presenters.js'].concat(
+var files = ['wrap_begin.jsx', 'utils.jsx', 'templatehelper.jsx', 'promise.jsx', 'validator.jsx', 'mixins.jsx', 'editor.jsx', 'presenters.jsx'].concat(
 	validatorFiles, editorFiles, presenterFiles,
-	['label.js', 'title.js', 'validationclassstatus.js', 'form.js', 'presenter.js', 'wrap_end.js']
+	['label.jsx', 'title.jsx', 'validationclassstatus.jsx', 'form.jsx', 'presenter.jsx', 'wrap_end.jsx']
 );
 
 gulp.task('build', function(){
 	return gulp.src(files.map(function(e){ return path.join('src', e); }))
-	  .pipe(concat('shift.js'))
+	  .pipe(concat('shift.jsx'))
+	  .pipe(gulp.dest('js'))
+	  .pipe(react({harmony: true}))
 	  .pipe(gulp.dest('js'));
 });
 
 gulp.task('watch', function(){
-	gulp.watch(['src/**/*.js'], ['build']);
+	gulp.watch(['src/**/*.jsx'], ['build']);
 });
 
 gulp.task('default', ['build', 'watch']);
