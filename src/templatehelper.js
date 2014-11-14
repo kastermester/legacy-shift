@@ -56,7 +56,7 @@ utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, chi
 	if(typeof(properties) === 'string'){
 		return node;
 	}
-	return new node.constructor(properties, children);
+	return React.addons.cloneWithProps(node, utils.extend({}, properties, {children: children}));
 };
 
 utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, convertCategoryName, reactNode, templateMap, explicitFieldName, callOnImplicitCategories){
@@ -144,6 +144,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceExplicitFields({}, {}, convertCategoryName, child, templateMap, field, function(){});
 				if(renderedChild !== null){
+					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, utils.extend({}, renderedChild.props, {key: field + renderedChild.props.key}), renderedChild.props.children);
 					result.push(renderedChild);
 				}
 			});
@@ -160,6 +161,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category);
 				if(renderedChild !== null){
+					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, utils.extend({}, renderedChild.props, {key: category + renderedChild.props.key}), renderedChild.props.children);
 					result.push(renderedChild);
 				}
 			});
@@ -173,6 +175,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category);
 				if(renderedChild !== null){
+					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, utils.extend({}, renderedChild.props, {key: category + renderedChild.props.key}), renderedChild.props.children);
 					result.push(renderedChild);
 				}
 			});
@@ -204,6 +207,15 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 	}
 };
 
-Shift.FieldsFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
-Shift.CategoryFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
-Shift.CategoryNameFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.FieldsFor = React.createClass({
+	displayName: 'ShiftFieldsFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
+Shift.CategoryFor = React.createClass({
+	displayName: 'ShiftCategoryFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
+Shift.CategoryNameFor = React.createClass({
+	displayName: 'ShiftCategoryName',
+	render: function(){throw new Error("Should not be rendered")}
+});

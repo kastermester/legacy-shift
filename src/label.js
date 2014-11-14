@@ -1,5 +1,9 @@
-Shift.LabelFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.LabelFor = React.createClass({
+	displayName: 'ShiftLabelFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
 Shift.Label = React.createClass({
+	displayName: 'ShiftLabel',
 	getDefaultProps: function() {
 		return {
 			tagName: 'label',

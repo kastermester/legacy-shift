@@ -1,5 +1,9 @@
-Shift.ValidationClassStatusFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.ValidationClassStatusFor = React.createClass({
+	displayName: 'ShiftValidationClassStatusFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
 Shift.ValidationClassStatus = React.createClass({
+	displayName: 'ShiftValidationClassStatus',
 	getDefaultProps: function() {
 		return {
 			tagName: 'div',

@@ -1,7 +1,14 @@
-Shift.EditorFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
-Shift.ValidationMessageFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.EditorFor = React.createClass({
+	displayName: 'ShiftEditorFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
+Shift.ValidationMessageFor = React.createClass({
+	displayName: 'ShiftValidationMessageFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
 
 Shift.Form = React.createClass({
+	displayName: 'ShiftForm',
 	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
 	propTypes: {
 		events: React.PropTypes.shape({
@@ -98,21 +105,22 @@ Shift.Form = React.createClass({
 		this.fieldErrors = null;
 	},
 
-	defaultTemplate: [Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
+	defaultTemplate: [Shift.FieldsFor({key: 'fields'}, Shift.ValidationClassStatusFor({
 			errorClassName: 'validation-error'
 		}, [
-			Shift.LabelFor(),
-			Shift.EditorFor(),
-			Shift.ValidationMessageFor()
+			Shift.LabelFor({key: 'label'}),
+			Shift.EditorFor({key: 'editor'}),
+			Shift.ValidationMessageFor({key: 'validation'})
 		])),
-		Shift.CategoryFor({}, React.DOM.fieldset({}, [
-			Shift.CategoryNameFor({tagName: 'legend'}),
-			Shift.FieldsFor({}, Shift.ValidationClassStatusFor({
-				errorClassName: 'validation-error'
+		Shift.CategoryFor({key: 'category'}, React.DOM.fieldset({}, [
+			Shift.CategoryNameFor({tagName: 'legend', key: 'category-name'}),
+			Shift.FieldsFor({key: 'fields'}, Shift.ValidationClassStatusFor({
+				errorClassName: 'validation-error',
+				key: 'validation'
 			}, [
-				Shift.LabelFor(),
-				Shift.EditorFor(),
-				Shift.ValidationMessageFor()
+				Shift.LabelFor({key: 'label'}),
+				Shift.EditorFor({key: 'editor'}),
+				Shift.ValidationMessageFor({key: 'validation'})
 			]))
 		]))
 	],
@@ -129,7 +137,7 @@ Shift.Form = React.createClass({
 		// Doing it in this odd fashion seems to be the only reliable way of getting it to work in all browsers
 		// even if there's no other submit button in the form. Safari won't accept a button with display:none
 		// and IE11 even fails with visibility hidden
-		template.push(React.DOM.input({type: 'submit', style:{
+		template.push(React.DOM.input({key: 'shift-submit', type: 'submit', style:{
 			height:0,
 			width:0,
 			display:'inline',
@@ -271,6 +279,7 @@ Shift.Form = React.createClass({
 				fieldName: fieldName,
 				addRef: addArtificialRef,
 				removeRef: removeArtificialRef,
+				key: 'editor-' + fieldName,
 				child: utils.unwrapEditor(field.editor)(utils.extend({}, field.editorProps, opts))
 			})
 		});
@@ -290,6 +299,7 @@ Shift.Form = React.createClass({
 				tagName: tagName,
 				text: that.translate(label),
 				editorId: that.generateEditorId(fieldName),
+				key: 'label-' + fieldName,
 				className: utils.mergeClassNames(
 					className,
 					errorClassName,
@@ -309,6 +319,7 @@ Shift.Form = React.createClass({
 			return Shift.Label({
 				tagName: tagName,
 				text: msg,
+				key: 'validation-message-' + fieldName,
 				className: utils.mergeClassNames(
 					className,
 					errorClassName,
@@ -326,6 +337,7 @@ Shift.Form = React.createClass({
 
 			return Shift.ValidationClassStatus({
 				tagName: tagName,
+				key: 'validation-class-status-' + fieldName,
 				className: utils.mergeClassNames(
 					className,
 					errorClassName,
@@ -342,7 +354,7 @@ Shift.Form = React.createClass({
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
 			return utils.unwrapPresenter(field.presenter)(utils.extend({}, field.presenterProps, {
-				key: 'field.presenter.'+fieldName,
+				key: 'presenter-'+fieldName,
 				value: that.getPresenterFieldValue(fieldName),
 				className: reactNode.props.className,
 				locale: that.props.locale,
@@ -357,6 +369,7 @@ Shift.Form = React.createClass({
 			var className = reactNode.props.className;
 			return Shift.Title({
 				tagName: tagName,
+				key: 'title-' + fieldName,
 				text: that.translate(field.label),
 				className: className
 			});

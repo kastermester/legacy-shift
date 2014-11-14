@@ -1,4 +1,7 @@
-Shift.TitleFor = React.createClass({render: function(){throw new Error("Should not be rendered")}});
+Shift.TitleFor = React.createClass({
+	displayName: 'ShiftTitleFor',
+	render: function(){throw new Error("Should not be rendered")}
+});
 Shift.Title = React.createClass({
 	getDefaultProps: function() {
 		return {

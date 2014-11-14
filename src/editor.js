@@ -1,6 +1,7 @@
 Shift.Editors = {}
 
 Shift.Editor = React.createClass({
+	displayName: 'ShiftEditor',
 	componentDidMount: function(){
 		this.props.addRef(this.props.fieldName, this.refs.editor);
 	},
