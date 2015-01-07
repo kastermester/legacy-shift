@@ -205,8 +205,21 @@ var utils = Shift.utils = {
 			return utils.makePromise(err, true);
 		}
 	},
-
-	mergeClassNames: function(className, errorClassName, isValid){
+	mergeClassNames: function(){
+		args = arguments
+		classNames = {};
+		for(var i = 0, n = args.length; i < n; i++){
+			classes = args[i].split(' ');
+			for(var j = 0, m = classes.length; j < m; j++){
+				if(classes[j].length == 0){
+					continue;
+				}
+				classNames[classes[j]] = true;
+			}
+		}
+		return Object.keys(classNames).join(' ');
+	},
+	maybeAppendErrorClassNames: function(className, errorClassName, isValid){
 		var result = [];
 		if (typeof(className) == 'string' && className.length > 0){
 			result.push(className);

@@ -100,8 +100,12 @@ Shift.Form = ShiftForm = React.createClass({
 		this.validators = null;
 		this.validatorsDependingOnField = null;
 		this.fieldErrors = null;
+		this.editors = null;
 	},
 
+	componentDidMount: function() {
+		this.mounted = true;
+	},
 	defaultTemplate: [<ShiftFieldsFor key='fields'>
 		<ShiftValidationClassStatusFor errorClassName='validation-error'>
 			<ShiftLabelFor key='label' />
@@ -209,9 +213,19 @@ Shift.Form = ShiftForm = React.createClass({
 
 		var templateMap = this.getTemplateMap();
 
-		return utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
+		var result = utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
 			return that.translateCategoryName(category);
-		}, templateMap);
+		}, templateMap, this.getFieldValue, this.props.context, this.props.schema);
+
+		var editors = [];
+
+		utils.templateHelper.forEachEditor(result, function(e){
+			editors.push(e.props.fieldName);
+		});
+
+		this.editors = editors;
+
+		return result;
 	},
 
 	isFieldValid: function(fieldName){
@@ -251,7 +265,7 @@ Shift.Form = ShiftForm = React.createClass({
 			var field = that.props.schema[fieldName];
 			var value = that.getInitialFieldValue(fieldName);
 			var opts = {
-				className: utils.mergeClassNames(
+				className: utils.maybeAppendErrorClassNames(
 					reactNode.props.className,
 					reactNode.props.errorClassName,
 					that.isFieldValid(fieldName)
@@ -260,6 +274,9 @@ Shift.Form = ShiftForm = React.createClass({
 				locale: that.props.locale,
 				editorId: that.generateEditorId(fieldName),
 				submit: that.submit,
+				focusNext: that.focusNext,
+				focusPrevious: that.focusPrevious,
+				field: fieldName,
 				events: {
 					onChange: function(oldValue, newValue){
 						that.valueChanged(fieldName, oldValue, newValue);
@@ -279,7 +296,7 @@ Shift.Form = ShiftForm = React.createClass({
 				fieldName={fieldName}
 				addRef={addArtificialRef}
 				removeRef={removeArtificialRef}
-				key={'editor-' + fieldName}
+				key={'editor-' + fieldName + (reactNode.key ? ('-' + reactNode.key) : '')}
 				child={React.createElement(utils.unwrapEditor(field.editor), (utils.extend({}, field.editorProps, opts)))}
 			/>
 		});
@@ -300,7 +317,7 @@ Shift.Form = ShiftForm = React.createClass({
 				text={that.translate(label)}
 				editorId={that.generateEditorId(fieldName)}
 				key={'label-' + fieldName}
-				className={utils.mergeClassNames(
+				className={utils.maybeAppendErrorClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
@@ -320,7 +337,7 @@ Shift.Form = ShiftForm = React.createClass({
 				tagName={tagName}
 				text={msg}
 				key={'validation-message-' + fieldName}
-				className={utils.mergeClassNames(
+				className={utils.maybeAppendErrorClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
@@ -338,7 +355,7 @@ Shift.Form = ShiftForm = React.createClass({
 			return <ShiftValidationClassStatus
 				tagName={tagName}
 				key={'validation-class-status-' + fieldName}
-				className={utils.mergeClassNames(
+				className={utils.maybeAppendErrorClassNames(
 					className,
 					errorClassName,
 					that.isFieldValid(fieldName)
@@ -347,7 +364,7 @@ Shift.Form = ShiftForm = React.createClass({
 				reactNode.props.children.map(function(child){
 					return utils.templateHelper.replaceExplicitFields([], [], function(category){
 						return that.translateCategoryName(category);
-					}, child, result, fieldName);
+					}, child, result, fieldName, null, that.getFieldValue, that.props.context, that.props.schema);
 				})
 			}</ShiftValidationClassStatus>;
 		});
@@ -360,7 +377,8 @@ Shift.Form = ShiftForm = React.createClass({
 				value: that.getPresenterFieldValue(fieldName),
 				className: reactNode.props.className,
 				locale: that.props.locale,
-				context: that.props.context
+				context: that.props.context,
+				field: fieldName,
 			})));
 		});
 
@@ -462,6 +480,10 @@ Shift.Form = ShiftForm = React.createClass({
 	},
 
 	getValue: function(){
+		if(!this.mounted){
+			return this.props.initialValue;
+		}
+
 		var result = {};
 		for(var key in this.artificialRefs){
 			var editor = this.artificialRefs[key];
@@ -485,6 +507,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 	valueChanged: function(field, oldValue, newValue){
 		this.triggerEvent('onChange', arguments);
+		this.forceUpdate();
 	},
 	// This function is quite complex
 	//
@@ -565,7 +588,12 @@ Shift.Form = ShiftForm = React.createClass({
 				this.fieldErrors = fieldErrors;
 				that.activeValidationPromise = null;
 				if(setFocusOnFail){
-					that.refs['field.editor.'+ Object.keys(this.fieldErrors)[0]].select();
+					var editor = that.artificialRefs[Object.keys(this.fieldErrors)[0]];
+					if (editor.select){
+						editor.select();
+					} else {
+						editor.focus();
+					}
 				}
 			}
 			defer.reject(utils.extend({}, fieldErrors));
@@ -665,6 +693,51 @@ Shift.Form = ShiftForm = React.createClass({
 			value[field][sourceValidator.id] = error;
 		}
 	},
+	focusNext: function(){
+		var idx, editor;
+		if (this.fieldInFocus){
+			idx = this.editors.indexOf(this.fieldInFocus);
+		} else {
+			idx = -1;
+		}
+
+		while(true){
+			if (idx == this.editors.length || this.editors.length == 0){
+				this.blur();
+				return false;
+			} else {
+				editor = this.editors[idx+1];
+				if (this.artificialRefs[editor].isDisabled()){
+					idx++;
+					continue;
+				}
+				this.focus(editor);
+				return true;
+			}
+		}
+	},
+	focusPrevious: function(){
+		var idx, editor;
+		if (this.fieldInFocus){
+			idx = this.editors.indexOf(this.fieldInFocus);
+		} else {
+			idx = this.editors.length;
+		}
+
+		while(true){
+			if (idx == 0){
+				this.blur();
+			} else {
+				var editor = this.editors[idx-1];
+				if (this.artificialRefs[editor].isDisabled()){
+					idx--;
+					continue;
+				}
+				this.focus(editor);
+				return;
+			}
+		}
+	},
 	clearFieldError: function(field, sourceValidator, value){
 		this.setFieldError(field, sourceValidator, null, value);
 	},
@@ -693,6 +766,16 @@ Shift.Form = ShiftForm = React.createClass({
 				that.triggerEvent('onFieldInFocusChange', [null]);
 			}
 		}, 0);
+	},
+
+	getFieldValue: function(fieldName){
+		if(!fieldName){
+			return this.getValue();
+		}
+		if(this.artificialRefs[fieldName]){
+			return this.artificialRefs[fieldName].getValue();
+		}
+		return this.props.initialValue[fieldName];
 	},
 
 	focus: function(fieldName){

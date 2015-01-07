@@ -103,7 +103,12 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 
 		var result = utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
 			return that.translateCategoryName(category);
-		}, templateMap);
+		}, templateMap, function(fieldName){
+			if(!fieldName){
+				return that.props.value;
+			}
+			return that.props.value[fieldName];
+		}, this.props.context, this.props.schema);
 
 		return result;
 	},
@@ -119,7 +124,8 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 				value: that.props.value[fieldName],
 				className: reactNode.props.className,
 				locale: that.props.locale,
-				context: that.props.context
+				context: that.props.context,
+				field: fieldName
 			})));
 		});
 

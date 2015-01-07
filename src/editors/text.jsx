@@ -1,5 +1,5 @@
 Shift.Editors.Text = ShiftTextEditor = React.createClass({
-	mixins: [Shift.Mixins.events],
+	mixins: [Shift.Mixins.events, Shift.Mixins.disabledEditorSupport],
 	getDefaultProps: function(){
 		return {
 			initialValue: '',
@@ -13,7 +13,6 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		initialValue: React.PropTypes.string,
 		className: React.PropTypes.string,
 		extraClassName: React.PropTypes.string,
-		disabled: React.PropTypes.bool,
 		placeholderText: React.PropTypes.string
 	},
 	getInitialState: function(){
@@ -33,7 +32,7 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 			maxLength={this.props.maxLength}
 			className={utils.mergeClassNames(this.props.className, this.props.extraClassName)}
 			tabIndex={this.props.tabIndex}
-			disabled={this.props.disabled || !this.state.enabled}
+			disabled={this.props.disabled || this.state.disabled}
 			placeholder={this.props.placeholderText}
 			id={this.props.editorId}
 		/>;
@@ -78,13 +77,5 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 
 	select: function(){
 		this.refs.field.getDOMNode().select();
-	},
-
-	enable: function(){
-		this.setState({enabled: true});
-	},
-
-	disable: function(){
-		this.setState({enabled: false});
 	}
 });
