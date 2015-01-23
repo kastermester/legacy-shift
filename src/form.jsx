@@ -57,12 +57,18 @@ Shift.Form = ShiftForm = React.createClass({
 
 	addArtificialRef: function(fieldName, ref){
 		this.artificialRefs[fieldName] = ref;
+		delete this.newValues[fieldName];
 	},
 	removeArtificialRef: function(fieldName){
-		delete this.artificialRefs[fieldName];
+		if(this.newValues !== null){
+			this.newValues[fieldName] = this.artificialRefs[fieldName].getValue();
+			delete this.artificialRefs[fieldName];
+			this.forceUpdate();
+		}
 	},
 	componentWillMount: function(){
-		this.artificialRefs = {}
+		this.artificialRefs = {};
+		this.newValues = {};
 		this.validators = {};
 		this.validatorsWithDependencies = {};
 		this.validatorsDependingOnField = {};
@@ -101,6 +107,7 @@ Shift.Form = ShiftForm = React.createClass({
 		this.validatorsDependingOnField = null;
 		this.fieldErrors = null;
 		this.editors = null;
+		this.newValues = null;
 	},
 
 	componentDidMount: function() {
@@ -130,7 +137,7 @@ Shift.Form = ShiftForm = React.createClass({
 	</ShiftFieldsFor>],
 
 	getTemplate: function(){
-		var canSubmit = !this.state.submitting //&& Object.keys(this.state.fieldErrors).length == 0;
+		var canSubmit = !this.state.submitting;
 		var template = this.props.template || this.defaultTemplate;
 		if(template instanceof Array){
 			template = template.slice(0);
@@ -215,7 +222,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 		var result = utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
 			return that.translateCategoryName(category);
-		}, templateMap, this.getFieldValue, this.props.context, this.props.schema);
+		}, templateMap, this.getFieldValue, this.props.context, this.props.schema, this);
 
 		var editors = [];
 
@@ -247,6 +254,9 @@ Shift.Form = ShiftForm = React.createClass({
 		return this.props.idPrefix + fieldName;
 	},
 	getInitialFieldValue: function(fieldName){
+		if(this.newValues[fieldName] !== undefined){
+			return this.newValues[fieldName];
+		}
 		var initialValue = this.props.initialValue || {};
 		return initialValue[fieldName];
 	},
@@ -488,6 +498,10 @@ Shift.Form = ShiftForm = React.createClass({
 		for(var key in this.artificialRefs){
 			var editor = this.artificialRefs[key];
 			result[key] = editor.getValue();
+		}
+		for(var key in this.newValues){
+			var value = this.newValues[key];
+			result[key] = value;
 		}
 		return result;
 	},
