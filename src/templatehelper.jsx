@@ -244,21 +244,23 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 
 		if(typeof(category) == 'string'){
 			var result = [];
-			React.Children.forEach(reactNode.props.children, function(child){
-				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category, fieldValues, context, schema, form);
-				if(renderedChild !== null){
-					if(Array.isArray(renderedChild)){
-						var children = [];
-						React.Children.forEach(renderedChild, function(child){
-							children.push(utils.templateHelper.cloneNodeWithNewProperties(child, {key: category + child.props.key}, child.props.children));
-						});
-						renderedChild = children;
-					} else {
-						renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+			if(categories[category]){
+				React.Children.forEach(reactNode.props.children, function(child){
+					var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category, fieldValues, context, schema, form);
+					if(renderedChild !== null){
+						if(Array.isArray(renderedChild)){
+							var children = [];
+							React.Children.forEach(renderedChild, function(child){
+								children.push(utils.templateHelper.cloneNodeWithNewProperties(child, {key: category + child.props.key}, child.props.children));
+							});
+							renderedChild = children;
+						} else {
+							renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+						}
+						result.push(renderedChild);
 					}
-					result.push(renderedChild);
-				}
-			});
+				});
+			}
 
 			return result;
 		}
