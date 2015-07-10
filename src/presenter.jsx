@@ -31,15 +31,14 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 			</fieldset>
 		</ShiftCategoryFor>
 	</div>,
-	getPropTypes: function(){
-		return {
-			fields: React.PropTypes.arrayOf(React.PropTypes.string)
-		};
+	propTypes: {
+		fields: React.PropTypes.arrayOf(React.PropTypes.string)
 	},
 	getDefaultProps: function(){
 		return {
 			locale: 'en_US',
-			context: null
+			context: null,
+			TitleComponent: ShiftTitle
 		};
 	},
 	translateCategoryName: function(category){
@@ -134,9 +133,11 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
-			return <ShiftTitle
+			var TitleComponent = that.props.TitleComponent;
+			return <TitleComponent
 				key={'title-' + fieldName}
 				tagName={tagName}
+				locale={that.props.locale}
 				text={that.translate(field.label)}
 				className={className}
 			/>;

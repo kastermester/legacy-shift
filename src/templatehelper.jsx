@@ -80,7 +80,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 
 	if(Shift.CategoryFor.type == reactNode.type){
 		var categoryName = reactNode.props.category;
-		if(categoryName){
+		if(typeof(categoryName) == 'string'){
 			explicitCategories[categoryName] = true;
 		} else {
 			callOnImplicitCategories.call(undefined);
@@ -108,6 +108,10 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 		if(reactNode.props.fieldValue){
 			var fieldValueProperty = reactNode.props.fieldValueProperty ? reactNode.props.fieldValueProperty : 'fieldValue';
 			extraProps[fieldValueProperty] = fieldValues(fieldName);
+		}
+		if(reactNode.props.formInstance){
+			var formInstanceProperty = reactNode.props.formInstanceProperty ? reactNode.props.formInstanceProperty : 'formInstance';
+			extraProps[formInstanceProperty] = form;
 		}
 		if(reactNode.props.context){
 			var contextProperty = reactNode.props.contextProperty ? reactNode.props.contextProperty : 'context';
@@ -209,7 +213,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, categoryName, fieldValues, context, schema, form){
 	if(reactNode.type == Shift.FieldsFor.type){
 		var fields = implicitFields;
-		if(categoryName){
+		if(typeof(categoryName) == 'string'){
 			fields = categories[categoryName];
 		}
 		var template = fields.map(function(field){
@@ -218,7 +222,15 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceExplicitFields({}, {}, convertCategoryName, child, templateMap, field, function(){}, fieldValues, context, schema, form);
 				if(renderedChild !== null){
-					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: field + renderedChild.props.key}, renderedChild.props.children);
+					if(Array.isArray(renderedChild)){
+						var children = [];
+						React.Children.forEach(renderedChild, function(child){
+							children.push(utils.templateHelper.cloneNodeWithNewProperties(child, {key: field + child.props.key}, child.props.children));
+						});
+						renderedChild = children;
+					} else {
+						renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: field + renderedChild.props.key}, renderedChild.props.children);
+					}
 					result.push(renderedChild);
 				}
 			});
@@ -230,12 +242,20 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 	} else if(reactNode.type == Shift.CategoryFor.type){
 		var category = reactNode.props.category;
 
-		if(category){
+		if(typeof(category) == 'string'){
 			var result = [];
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category, fieldValues, context, schema, form);
 				if(renderedChild !== null){
-					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+					if(Array.isArray(renderedChild)){
+						var children = [];
+						React.Children.forEach(renderedChild, function(child){
+							children.push(utils.templateHelper.cloneNodeWithNewProperties(child, {key: category + child.props.key}, child.props.children));
+						});
+						renderedChild = children;
+					} else {
+						renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+					}
 					result.push(renderedChild);
 				}
 			});
@@ -249,7 +269,15 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 			React.Children.forEach(reactNode.props.children, function(child){
 				var renderedChild = utils.templateHelper.replaceImplicitFields(child, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, category, fieldValues, context, schema, form);
 				if(renderedChild !== null){
-					renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+					if(Array.isArray(renderedChild)){
+						var children = [];
+						React.Children.forEach(renderedChild, function(child){
+							children.push(utils.templateHelper.cloneNodeWithNewProperties(child, {key: category + child.props.key}, child.props.children));
+						});
+						renderedChild = children;
+					} else {
+						renderedChild = utils.templateHelper.cloneNodeWithNewProperties(renderedChild, {key: category + renderedChild.props.key}, renderedChild.props.children);
+					}
 					result.push(renderedChild);
 				}
 			});
@@ -259,7 +287,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 		var merged = [];
 		return merged.concat.apply(merged, template);
 	} else if (reactNode.type == Shift.CategoryNameFor.type){
-		if(!categoryName){
+		if(typeof(categoryName) != 'string'){
 			throw new Error("CategoryNameFor must be used inside a CategoryFor node, and outside a FieldsFor node");
 		}
 		return React.DOM[reactNode.props.tagName || 'span'](null, convertCategoryName(categoryName));

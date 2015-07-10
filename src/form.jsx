@@ -1,4 +1,9 @@
 Shift.EditorFor = ShiftEditorFor = React.createClass({
+	getDefaultProps: function(){
+		return {
+			clearValueOnUnmount: false
+		};
+	},
 	render: function(){throw new Error("Should not be rendered")}
 });
 Shift.ValidationMessageFor = ShiftValidationMessageFor = React.createClass({
@@ -24,7 +29,9 @@ Shift.Form = ShiftForm = React.createClass({
 			idPrefix: 'form-',
 			locale: 'en_US',
 			context: null,
-			submitButtonId: null
+			submitButtonId: null,
+			LabelComponent: ShiftLabel,
+			TitleComponent: ShiftTitle
 		};
 	},
 	translateCategoryName: function(category){
@@ -59,12 +66,17 @@ Shift.Form = ShiftForm = React.createClass({
 		this.artificialRefs[fieldName] = ref;
 		delete this.newValues[fieldName];
 	},
-	removeArtificialRef: function(fieldName){
-		if(this.newValues !== null){
-			this.newValues[fieldName] = this.artificialRefs[fieldName].getValue();
-			delete this.artificialRefs[fieldName];
-			this.forceUpdate();
+	removeArtificialRef: function(fieldName, clearValue){
+		if(this.newValues != null){
+			if(clearValue){
+				delete this.newValues[fieldName];
+			} else {
+				if(this.newValues[fieldName] === undefined){
+					this.newValues[fieldName] = this.artificialRefs[fieldName].getValue();
+				}
+			}
 		}
+		delete this.artificialRefs[fieldName];
 	},
 	componentWillMount: function(){
 		this.artificialRefs = {};
@@ -113,14 +125,16 @@ Shift.Form = ShiftForm = React.createClass({
 	componentDidMount: function() {
 		this.mounted = true;
 	},
-	defaultTemplate: [<ShiftFieldsFor key='fields'>
-		<ShiftValidationClassStatusFor errorClassName='validation-error'>
+	defaultTemplate: [<div>
+		<ShiftFieldsFor key='fields'>
+		<ShiftValidationClassStatusFor key="validation-group" errorClassName='validation-error'>
 			<ShiftLabelFor key='label' />
 			<ShiftEditorFor key='editor' />
 			<ShiftValidationMessageFor key='validation' />
 		</ShiftValidationClassStatusFor>
+		</ShiftFieldsFor>
 		<ShiftCategoryFor key='category'>
-			<fieldset>
+			<fieldset key="fieldset">
 				<ShiftCategoryNameFor tagName='legend' key='category-name' />
 				<ShiftFieldsFor key='fields'>
 					<ShiftValidationClassStatusFor
@@ -134,7 +148,7 @@ Shift.Form = ShiftForm = React.createClass({
 				</ShiftFieldsFor>
 			</fieldset>
 		</ShiftCategoryFor>
-	</ShiftFieldsFor>],
+	</div>],
 
 	getTemplate: function(){
 		var canSubmit = !this.state.submitting;
@@ -199,8 +213,8 @@ Shift.Form = ShiftForm = React.createClass({
 
 			var fields = [];
 
-			for(var i in fields){
-				var field = fields[i];
+			for(var i in fieldNames){
+				var field = fieldNames[i];
 
 				if(this.props.schema[field].editor){
 					fields.push(field);
@@ -239,7 +253,7 @@ Shift.Form = ShiftForm = React.createClass({
 		return typeof(this.state.fieldErrors[fieldName]) == 'undefined' || Object.keys(this.state.fieldErrors[fieldName]).length == 0;
 	},
 
-	getFieldErrorMessage: function(fieldName){
+	getFieldErrorMessage: function(fieldName, translate){
 		var err = this.state.fieldErrors[fieldName];
 
 		var keys = Object.keys(err);
@@ -248,7 +262,11 @@ Shift.Form = ShiftForm = React.createClass({
 			return '';
 		}
 
-		return this.translate(err[keys[0]]);
+		if (translate){
+			return this.translate(err[keys[0]]);
+		} else {
+			return err[keys[0]];
+		}
 	},
 	generateEditorId: function(fieldName){
 		return this.props.idPrefix + fieldName;
@@ -273,7 +291,14 @@ Shift.Form = ShiftForm = React.createClass({
 		result.push(Shift.EditorFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			var value = that.getInitialFieldValue(fieldName);
+			var initialValue = function(){
+				var v = that.getInitialFieldValue(fieldName);
+				if (!utils.isEmptyValue(v)){
+					return v;
+				}
+
+				return undefined;
+			};
 			var opts = {
 				className: utils.maybeAppendErrorClassNames(
 					reactNode.props.className,
@@ -299,13 +324,12 @@ Shift.Form = ShiftForm = React.createClass({
 					}
 				}
 			};
-			if (!utils.isEmptyValue(value)){
-				opts.initialValue = value;
-			}
 			return <ShiftEditor
 				fieldName={fieldName}
+				initialValue={initialValue}
 				addRef={addArtificialRef}
 				removeRef={removeArtificialRef}
+				clearValueOnUnmount={reactNode.props.clearValueOnUnmount}
 				key={'editor-' + fieldName + (reactNode.key ? ('-' + reactNode.key) : '')}
 				child={React.createElement(utils.unwrapEditor(field.editor), (utils.extend({}, field.editorProps, opts)))}
 			/>
@@ -322,10 +346,12 @@ Shift.Form = ShiftForm = React.createClass({
 			if (field.editorLabel){
 				label = field.editorLabel;
 			}
-			return <ShiftLabel
+			var LabelComponent = that.props.LabelComponent;
+			return <LabelComponent
 				tagName={tagName}
-				text={that.translate(label)}
+				text={LabelComponent == ShiftLabel ? that.translate(label) : label}
 				editorId={that.generateEditorId(fieldName)}
+				locale={that.props.locale}
 				key={'label-' + fieldName}
 				className={utils.maybeAppendErrorClassNames(
 					className,
@@ -341,11 +367,13 @@ Shift.Form = ShiftForm = React.createClass({
 			var tagName = reactNode.props.tagName ? reactNode.props.tagName : 'span';
 			var errorClassName = reactNode.props.errorClassName;
 			var isValid = that.isFieldValid(fieldName);
-			var msg = that.getFieldErrorMessage(fieldName);
+			var LabelComponent = that.props.LabelComponent;
+			var msg = that.getFieldErrorMessage(fieldName, LabelComponent == ShiftLabel);
 
-			return <ShiftLabel
+			return <LabelComponent
 				tagName={tagName}
 				text={msg}
+				locale={that.props.locale}
 				key={'validation-message-' + fieldName}
 				className={utils.maybeAppendErrorClassNames(
 					className,
@@ -397,10 +425,12 @@ Shift.Form = ShiftForm = React.createClass({
 			var field = that.props.schema[fieldName];
 			var tagName = reactNode.props.tagName;
 			var className = reactNode.props.className;
-			return <ShiftTitle
+			var TitleComponent = that.props.TitleComponent;
+			return <TitleComponent
+				locale={that.props.locale}
 				tagName={tagName}
 				key={'title-' + fieldName}
-				text={that.translate(field.label)}
+				text={TitleComponent == ShiftTitle ? that.translate(field.label) : field.label}
 				className={className}
 			/>;
 		});
@@ -509,17 +539,43 @@ Shift.Form = ShiftForm = React.createClass({
 	setValue: function(values){
 		var value = utils.extend({}, this.state.presenterValues);
 		for(var key in values){
-			var editor = this.artificialRefs[key];
-			if(editor){
-				editor.setValue(values[key]);
+			var schema = this.props.schema[key];
+			if(schema == null){
+				continue;
 			}
-			value[key] = values[key];
+			var editorType = utils.unwrapEditor(schema.editor);
+			if(editorType == null){
+				continue;
+			}
+			var editor = this.artificialRefs[key];
+			var val = values[key];
+			if(utils.isEmptyValue(val) && editorType.defaultProps != null && editorType.defaultProps.initialValue){
+				val = editorType.defaultProps.initialValue;
+			}
+			if(editor){
+				editor.setValue(val);
+			}
+
+			this.newValues[key] = val;
+			value[key] = val;
 		}
 
 		this.setState({presenterValues: value});
 	},
 
+	setInitialFieldValue: function(fieldName, value){
+		if(this.newValues == null){
+			this.newValues = [];
+		}
+		if(value != null){
+			this.newValues[fieldName] = value;
+		} else {
+			delete this.newValues[fieldName];
+		}
+	},
+
 	valueChanged: function(field, oldValue, newValue){
+		delete this.newValues[field];
 		this.triggerEvent('onChange', arguments);
 		this.forceUpdate();
 	},
@@ -796,6 +852,17 @@ Shift.Form = ShiftForm = React.createClass({
 		if(fieldName in this.props.schema){
 			var field = this.artificialRefs[fieldName];
 			field.focus();
+		}
+	},
+
+	select: function(fieldName){
+		if(fieldName in this.props.schema){
+			var field = this.artificialRefs[fieldName];
+			if(field.select){
+				field.select();
+			} else {
+				field.focus();
+			}
 		}
 	},
 

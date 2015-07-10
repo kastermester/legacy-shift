@@ -13,7 +13,7 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		initialValue: React.PropTypes.string,
 		className: React.PropTypes.string,
 		extraClassName: React.PropTypes.string,
-		placeholderText: React.PropTypes.string
+		placeholderText: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object])
 	},
 	getInitialState: function(){
 		return {
@@ -33,7 +33,7 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 			className={utils.mergeClassNames(this.props.className, this.props.extraClassName)}
 			tabIndex={this.props.tabIndex}
 			disabled={this.props.disabled || this.state.disabled}
-			placeholder={this.translate(his.props.placeholderText)}
+			placeholder={this.translate(this.props.placeholderText)}
 			id={this.props.editorId}
 		/>;
 	},
