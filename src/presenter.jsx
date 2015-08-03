@@ -79,8 +79,8 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 
 			var fields = [];
 
-			for(var i in fields){
-				var field = fields[i];
+			for(var i in fieldNames){
+				var field = fieldNames[i];
 
 				if(this.props.schema[field].presenter){
 					fields.push(field);
