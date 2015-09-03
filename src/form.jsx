@@ -525,13 +525,13 @@ Shift.Form = ShiftForm = React.createClass({
 		}
 
 		var result = {};
-		for(var key in this.artificialRefs){
-			var editor = this.artificialRefs[key];
-			result[key] = editor.getValue();
-		}
 		for(var key in this.newValues){
 			var value = this.newValues[key];
 			result[key] = value;
+		}
+		for(var key in this.artificialRefs){
+			var editor = this.artificialRefs[key];
+			result[key] = editor.getValue();
 		}
 		return result;
 	},
