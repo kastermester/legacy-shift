@@ -276,10 +276,10 @@ Shift.Form = ShiftForm = React.createClass({
 			return this.newValues[fieldName];
 		}
 		var initialValue = this.props.initialValue || {};
-		return initialValue[fieldName];
+		return utils.getIn(initialValue, fieldName);
 	},
 	getPresenterFieldValue: function(fieldName){
-		return this.state.presenterValues[fieldName];
+		return utils.getIn(this.state.presenterValues, fieldName);
 	},
 	getTemplateMap: function(){
 		var that = this;

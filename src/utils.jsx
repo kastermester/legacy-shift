@@ -244,5 +244,26 @@ var utils = Shift.utils = {
 		}
 
 		return presenter;
+	},
+	getIn: function(val, key){
+		if(val == null){
+			return;
+		}
+
+		var keys = key.split('.')
+
+		var ret = val[keys[0]];
+
+		if (ret == null){
+			return;
+		}
+
+		keys.splice(0, 1);
+
+		if (keys.length > 0) {
+			return utils.getIn(ret, keys.join('.'))
+		}
+
+		return ret;
 	}
 };
