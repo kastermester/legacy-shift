@@ -250,6 +250,10 @@ var utils = Shift.utils = {
 			return;
 		}
 
+		if(Object.hasOwnProperty.call(val, key)){
+			return val[key];
+		}
+
 		var keys = key.split('.')
 
 		var ret = val[keys[0]];
