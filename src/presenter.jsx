@@ -44,8 +44,13 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 	translateCategoryName: function(category){
 		if(this.props.categoryTranslations){
 			if(this.props.categoryTranslations[this.props.locale]){
-				return this.props.categoryTranslations[this.props.locale][category];
+				category = this.props.categoryTranslations[this.props.locale][category];
 			}
+		}
+
+		if(this.props.TitleComponent != null){
+			var TitleComponent = this.props.TitleComponent;
+			return <TitleComponent text={category} locale={this.props.locale} />;
 		}
 
 		return category;
