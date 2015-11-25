@@ -51,7 +51,7 @@ utils.templateHelper = function(template, fieldNames, categories, convertCategor
 };
 
 utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, children, explicitKey){
-	// Case to handle instances of React.__internals.TextComponent could test with React.__internals.TextComponent.type === node.type
+	// Case to handle instances of React.__internals.TextComponent could test with React.__internals.TextComponent === node.type
 	// but that seems even more hacky than what this is already
 	if(typeof(properties) === 'string'){
 		return node;
@@ -69,16 +69,16 @@ utils.templateHelper.cloneNodeWithNewProperties = function(node, properties, chi
 		extraProps.key = explicitKey;
 	}
 
-	return React.addons.cloneWithProps(node, utils.extend({}, properties, extraProps));
+	return React.cloneElement(node, utils.extend({}, properties, extraProps));
 };
 
 utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCategories, convertCategoryName, reactNode, templateMap, explicitFieldName, callOnImplicitCategories, fieldValues, context, schema, form){
 	var fieldName;
-	if(Shift.FieldsFor.type == reactNode.type){
+	if(Shift.FieldsFor == reactNode.type){
 		return reactNode;
 	}
 
-	if(Shift.CategoryFor.type == reactNode.type){
+	if(Shift.CategoryFor == reactNode.type){
 		var categoryName = reactNode.props.category;
 		if(typeof(categoryName) == 'string'){
 			explicitCategories[categoryName] = true;
@@ -87,11 +87,11 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 		}
 	}
 
-	if(reactNode.type == Shift.CategoryNameFor.type){
+	if(reactNode.type == Shift.CategoryNameFor){
 		return reactNode;
 	}
 
-	if(reactNode.type == Shift.PassFieldProperties.type){
+	if(reactNode.type == Shift.PassFieldProperties){
 		var fieldName = explicitFieldName;
 		if(reactNode.props.field){
 			fieldName = reactNode.props.field;
@@ -129,7 +129,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 		return utils.templateHelper.replaceExplicitFields(explicitFields, explicitCategories, convertCategoryName, child, templateMap, explicitFieldName, callOnImplicitCategories, fieldValues, context, schema, form);
 	}
 
-	if([Shift.PassFormProperties.type, Shift.PassPresenterProperties].indexOf(reactNode.type) >= 0){
+	if([Shift.PassFormProperties, Shift.PassPresenterProperties].indexOf(reactNode.type) >= 0){
 		var extraProps = {};
 
 		if(reactNode.props.context){
@@ -159,7 +159,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 	for(var i = 0, n = templateMap.length; i < n-1; i += 2){
 		var reactType = templateMap[i];
 		var handler = templateMap[i+1];
-		if(reactNode.type == reactType.type){
+		if(reactNode.type == reactType){
 			if (explicitFieldName != null){
 				fieldName = explicitFieldName;
 			} else {
@@ -211,7 +211,7 @@ utils.templateHelper.replaceExplicitFields = function(explicitFields, explicitCa
 };
 
 utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields, implicitCategories, categories, convertCategoryName, templateMap, categoryName, fieldValues, context, schema, form){
-	if(reactNode.type == Shift.FieldsFor.type){
+	if(reactNode.type == Shift.FieldsFor){
 		var fields = implicitFields;
 		if(typeof(categoryName) == 'string'){
 			fields = categories[categoryName];
@@ -239,7 +239,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 		});
 		var merged = [];
 		return merged.concat.apply(merged, template);
-	} else if(reactNode.type == Shift.CategoryFor.type){
+	} else if(reactNode.type == Shift.CategoryFor){
 		var category = reactNode.props.category;
 
 		if(typeof(category) == 'string'){
@@ -288,7 +288,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 		});
 		var merged = [];
 		return merged.concat.apply(merged, template);
-	} else if (reactNode.type == Shift.CategoryNameFor.type){
+	} else if (reactNode.type == Shift.CategoryNameFor){
 		if(typeof(categoryName) != 'string'){
 			throw new Error("CategoryNameFor must be used inside a CategoryFor node, and outside a FieldsFor node");
 		}
@@ -312,7 +312,7 @@ utils.templateHelper.replaceImplicitFields = function(reactNode, implicitFields,
 };
 
 utils.templateHelper.forEachEditor = function(node, callback){
-	if (node.type == Shift.Editor.type){
+	if (node.type == Shift.Editor){
 		return callback(node);
 	}
 

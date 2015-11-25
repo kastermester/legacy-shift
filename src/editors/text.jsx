@@ -46,9 +46,9 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		return this.state.value;
 	},
 
-	valueChanged: function(){
+	valueChanged: function(e){
 		var oldValue = this.state.value;
-		var newValue = this.refs.field.getDOMNode().value;
+		var newValue = e.target.value;
 
 		if(oldValue != newValue){
 			this.setState({value: newValue}, function(){
@@ -66,16 +66,16 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 	},
 
 	focus: function(){
-		this.refs.field.getDOMNode().focus();
+		this.refs.field.focus();
 		this.fieldFocused();
 	},
 
 	blur: function(){
-		this.refs.field.getDOMNode().blur();
+		this.refs.field.blur();
 		this.fieldBlurred();
 	},
 
 	select: function(){
-		this.refs.field.getDOMNode().select();
+		this.refs.field.select();
 	}
 });

@@ -22,6 +22,6 @@ Shift.Editor = ShiftEditor = React.createClass({
 		delete props.fieldName;
 		delete props.addRef;
 		delete props.removeRef;
-		return React.addons.cloneWithProps(this.props.child, props);
+		return React.cloneElement(this.props.child, props);
 	}
 });

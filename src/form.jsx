@@ -120,6 +120,7 @@ Shift.Form = ShiftForm = React.createClass({
 		this.fieldErrors = null;
 		this.editors = null;
 		this.newValues = null;
+		this.mounted = false;
 	},
 
 	componentDidMount: function() {
@@ -494,18 +495,26 @@ Shift.Form = ShiftForm = React.createClass({
 				utils.async.whenAll([utils.ensurePromise(function(){
 					return that.triggerEvent('onSubmit', [values]);
 				})]).then(function(value){
-					that.setState({submitting: false});
+					if(that.mounted){
+						that.setState({submitting: false});
+					}
 					defer.resolve(value[0]);
 				}, function(error){
-					that.setState({submitting: false});
+					if(that.mounted){
+						that.setState({submitting: false});
+					}
 					defer.reject(error);
 				});
 			} else {
-				that.setState({submitting: false});
+				if(that.mounted){
+					that.setState({submitting: false});
+				}
 				defer.resolve();
 			}
 		}, function(errors){
-			that.setState({submitting: false});
+			if(that.mounted){
+				that.setState({submitting: false});
+			}
 			defer.reject(errors);
 		});
 
