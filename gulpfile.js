@@ -6,7 +6,7 @@ var concat = require('gulp-concat');
 var validatorFiles = ['required.jsx', 'minlength.jsx', 'longerthan.jsx'].map(function(f){
 	return path.join('validators', f);
 });
-var editorFiles = ['text.jsx'].map(function(f){
+var editorFiles = ['text.jsx', 'textarea.jsx'].map(function(f){
 	return path.join('editors', f);
 });
 var presenterFiles = ['text.jsx'].map(function(f){
