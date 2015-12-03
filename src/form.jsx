@@ -131,21 +131,21 @@ Shift.Form = ShiftForm = React.createClass({
 	componentDidMount: function() {
 		this.mounted = true;
 	},
-	defaultTemplate: [<div>
+	defaultTemplate: [<div key="container">
 		<ShiftFieldsFor key='fields'>
-		<ShiftValidationClassStatusFor key="validation-group" errorClassName='validation-error'>
-			<ShiftLabelFor key='label' />
-			<ShiftEditorFor key='editor' />
-			<ShiftValidationMessageFor key='validation' />
-		</ShiftValidationClassStatusFor>
+			<ShiftValidationClassStatusFor errorClassName='validation-error'>
+				<ShiftLabelFor key='label' />
+				<ShiftEditorFor key='editor' />
+				<ShiftValidationMessageFor key='validation' />
+			</ShiftValidationClassStatusFor>
 		</ShiftFieldsFor>
 		<ShiftCategoryFor key='category'>
-			<fieldset key="fieldset">
+			<fieldset>
 				<ShiftCategoryNameFor tagName='legend' key='category-name' />
 				<ShiftFieldsFor key='fields'>
 					<ShiftValidationClassStatusFor
 						errorClassName='validation-error'
-						key='validation'
+						key="field"
 					>
 						<ShiftLabelFor key='label' />
 						<ShiftEditorFor key='editor' />
@@ -158,7 +158,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 	getTemplate: function(){
 		var canSubmit = !this.state.submitting;
-		var template = this.props.template || this.defaultTemplate;
+		var template = this.props.template || this.props.children || this.defaultTemplate;
 		if(template instanceof Array){
 			template = template.slice(0);
 		} else {

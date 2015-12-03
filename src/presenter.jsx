@@ -10,7 +10,7 @@ Shift.IfEmptyValueFor = ShiftIfEmptyValueFor = React.createClass({
 
 Shift.Presenter = ShiftPresenter = React.createClass({
 	mixins: [Shift.Mixins.translate],
-	defaultTemplate: <div>
+	defaultTemplate: <div key='div'>
 		<ShiftFieldsFor key='fields'>
 			<div>
 				<ShiftTitleFor key='title' />
@@ -19,7 +19,7 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 			</div>
 		</ShiftFieldsFor>
 		<ShiftCategoryFor key='category'>
-			<fieldset key='fieldset'>
+			<fieldset>
 				<ShiftCategoryNameFor key='category-name' tagName='legend' />
 				<ShiftFieldsFor key='fields'>
 					<div>
@@ -56,7 +56,7 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 		return category;
 	},
 	getTemplate: function(){
-		var template = this.props.template || this.defaultTemplate;
+		var template = this.props.template || this.props.children || this.defaultTemplate;
 		return template;
 	},
 	getFields: function(){
