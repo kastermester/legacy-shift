@@ -330,6 +330,9 @@ Shift.Form = ShiftForm = React.createClass({
 					}
 				}
 			};
+
+			var origProps = utils.extend({}, reactNode.props);
+			delete origProps.field;
 			return <ShiftEditor
 				fieldName={fieldName}
 				initialValue={initialValue}
@@ -337,7 +340,7 @@ Shift.Form = ShiftForm = React.createClass({
 				removeRef={removeArtificialRef}
 				clearValueOnUnmount={reactNode.props.clearValueOnUnmount}
 				key={'editor-' + fieldName + (reactNode.key ? ('-' + reactNode.key) : '')}
-				child={React.createElement(utils.unwrapEditor(field.editor), (utils.extend({}, field.editorProps, opts)))}
+				child={React.createElement(utils.unwrapEditor(field.editor), (utils.extend({}, origProps, field.editorProps, opts)))}
 			/>
 		});
 
@@ -416,7 +419,9 @@ Shift.Form = ShiftForm = React.createClass({
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, field.presenterProps, {
+			var origProps = utils.extend({}, reactNode.props);
+			delete origProps.field;
+			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, origProps, field.presenterProps, {
 				key: 'presenter-'+fieldName,
 				value: that.getPresenterFieldValue(fieldName),
 				className: reactNode.props.className,

@@ -123,7 +123,9 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode){
 			var field = that.props.schema[fieldName];
-			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, field.presenterProps, {
+			var origProps = utils.extend({}, reactNode.props);
+			delete origProps.field;
+			return React.createElement(utils.unwrapPresenter(field.presenter), (utils.extend({}, origProps, field.presenterProps, {
 				key: 'presenter-'+fieldName,
 				value: utils.getIn(that.props.value, fieldName),
 				className: reactNode.props.className,
