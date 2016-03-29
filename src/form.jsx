@@ -9,6 +9,9 @@ Shift.EditorFor = ShiftEditorFor = React.createClass({
 Shift.ValidationMessageFor = ShiftValidationMessageFor = React.createClass({
 	render: function(){throw new Error("Should not be rendered")}
 });
+Shift.IfEditValueForEquals = ShiftIfValueForEquals = React.createClass({
+	render: function(){throw new Error("Should not be rendered")}
+});
 
 Shift.Form = ShiftForm = React.createClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
@@ -455,6 +458,16 @@ Shift.Form = ShiftForm = React.createClass({
 		result.push(function(fieldName, reactNode){
 			var fieldValue = that.state.presenterValues[fieldName];
 			if(utils.isEmptyValue(fieldValue)){
+				return reactNode.props.children;
+			}
+
+			return null;
+		});
+
+		result.push(Shift.IfEditValueForEquals);
+		result.push(function(fieldName, reactNode){
+			var fieldValue = that.getFieldValue(fieldName);
+			if(fieldValue == reactNode.props.value){
 				return reactNode.props.children;
 			}
 
