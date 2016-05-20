@@ -245,7 +245,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 		var result = utils.templateHelper(template, this.getFields(), this.getCategories(), function(category){
 			return that.translateCategoryName(category);
-		}, templateMap, this.getFieldValue, this.props.context, this.props.schema, this);
+		}, templateMap, this.getFieldValue, this.props.context, this.props.schema, this.isFieldValid, this.getFieldErrorMessage, this);
 
 		var editors = [];
 
@@ -414,7 +414,7 @@ Shift.Form = ShiftForm = React.createClass({
 				reactNode.props.children.map(function(child){
 					return utils.templateHelper.replaceExplicitFields([], [], function(category){
 						return that.translateCategoryName(category);
-					}, child, result, fieldName, null, that.getFieldValue, that.props.context, that.props.schema);
+					}, child, result, fieldName, null, that.getFieldValue, that.props.context, that.props.schema, that.isFieldValid, that.getFieldErrorMessage, that);
 				})
 			}</ShiftValidationClassStatus>;
 		});

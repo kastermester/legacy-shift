@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Shift test</title>
+		<script type="text/javascript" src="http://fb.me/react-with-addons-0.14.2.js"></script>
+		<script type="text/javascript" src="http://fb.me/react-dom-0.14.2.js"></script>
+		<script type="text/javascript" src="/js/shift.js"></script>
+		<style type="text/css">
+			.validation-error {
+				color: red;
+			}
+			.validation-error input {
+				border: 1px solid red;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="main"></div>
+		<script type="text/javascript">
+			var submit = function(e){
+				e.stopPropagation();
+				e.preventDefault();
+				form.submit();
+			};
+
+			var test = React.createClass({
+				displayName: 'test',
+				render: function(){
+					console.log(this.props);
+					return React.DOM.div(null, 'YOLO')
+				}
+			});
+			var form = React.createElement(Shift.Form, {
+				schema: {
+					"test.field1": {
+						label: {
+							'en_US': 'Lol',
+							'da_DK': 'GG',
+						},
+						editorLabel: {
+							'en_US': 'Lol *',
+							'da_DK': 'GG *',
+						},
+						editorProps: {
+							extraClassName: 'yolo'
+						},
+						presenter: 'Text',
+						validators: ['required', {'type': 'minlength', params: {length: 4}}],
+						editor: 'Text'
+					},
+					"test.field2": {
+						label: {
+							'en_US': 'Lol2',
+							'da_DK': 'GG2',
+						},
+						editorLabel: {
+							'en_US': 'Lol2 *',
+							'da_DK': 'GG2 *',
+						},
+						presenter: 'Text',
+						validators: ['required', {'type': 'minlength', params: {length: 5}}],
+						editor: 'Text'
+					}
+				},
+				locale: 'en_US',
+				initialValue: {
+					"test.field1": 'ROFL',
+					"test.field2": 'YOLO'
+				},
+				categories: {
+					'Category': [
+						'test.field1',
+						'test.field2'
+					]
+				},
+				fields: [
+					'test.field1',
+					'test.field2'
+				],
+				events: {
+					onChange: function(field, oldValue, newValue){
+						console.log("change", field, oldValue, newValue);
+					},
+					onSubmit: function(){
+						console.log(form.getValue());
+					},
+					// onSubmitBegin: function(){
+					// 	document.getElementById('submit').style.color = 'white';
+					// },
+					// onSubmitEnd: function(){
+					// 	document.getElementById('submit').style.color = 'black';
+					// }
+				},
+				context: {'yolo': 'swag'},
+				submitButtonId: 'submit',
+				template: React.DOM.div({key: 'lol'},
+					React.createElement(Shift.PassFormProperties, {value: true, schema: true, context: true}, React.createElement(test, {key: 'yolo'})),
+					React.createElement(Shift.FieldsFor, {key: 'fields'},
+						React.createElement(Shift.TitleFor, {key: 'label'}),
+						React.createElement(Shift.EditorFor, {key: 'editor'}),
+						React.createElement(Shift.PresenterFor, {key: 'presenter'})
+					),
+					React.createElement(Shift.PassFieldProperties, {isFieldValid: true, errorMessage: true, field: 'test.field1', children: React.createElement(test)})
+				)
+			});
+			var form = ReactDOM.render(form, document.getElementById('main'));
+		</script>
+	</body>
+</html>
