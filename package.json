@@ -7,11 +7,10 @@
     "email": "kaare@kaareskovgaard.net"
   },
   "devDependencies": {
-    "serve": "=1.4.0",
-    "gulp": "=3.6.2",
-    "gulp-concat": "=2.2.0",
-    "gulp-react": "=2.0.0"
+    "gulp": "=3.9.1",
+    "gulp-concat": "=2.6.1",
+    "gulp-react": "=3.1.0",
+    "serve": "=2.4.2"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
