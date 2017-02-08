@@ -160,7 +160,6 @@ Shift.Form = ShiftForm = React.createClass({
 	</div>],
 
 	getTemplate: function(){
-		var canSubmit = !this.state.submitting;
 		var template = this.props.template || this.props.children || this.defaultTemplate;
 		if(template instanceof Array){
 			template = template.slice(0);
@@ -543,6 +542,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 		return defer.promise;
 	},
+
 	hasEvent: function(name){
 		if(this.props.events != null){
 			return typeof(this.props.events[name]) == 'function';
@@ -757,7 +757,6 @@ Shift.Form = ShiftForm = React.createClass({
 		}
 
 		var fieldErrors = this.fieldErrors;
-
 
 		var dependentValidators = this.validatorsDependingOnField[field];
 
