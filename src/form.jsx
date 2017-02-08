@@ -401,6 +401,11 @@ Shift.Form = ShiftForm = React.createClass({
 			var errorClassName = reactNode.props.errorClassName;
 			var isValid = that.isFieldValid(fieldName);
 
+			var children = reactNode.props.children;
+			if( Object.prototype.toString.call( children ) !== '[object Array]' ) {
+				children = [children];
+			}
+
 			return <ShiftValidationClassStatus
 				tagName={tagName}
 				key={'validation-class-status-' + fieldName}
@@ -410,7 +415,7 @@ Shift.Form = ShiftForm = React.createClass({
 					that.isFieldValid(fieldName)
 				)}
 			>{
-				reactNode.props.children.map(function(child){
+				children.map(function(child){
 					return utils.templateHelper.replaceExplicitFields([], [], function(category){
 						return that.translateCategoryName(category);
 					}, child, result, fieldName, null, that.getFieldValue, that.props.context, that.props.schema, that.isFieldValid, that.getFieldErrorMessage, that);
