@@ -1,3 +1,5 @@
 node_modules/*
 js/*
 !.gitkeep
+*.sublime-project
+*.sublime-workspace

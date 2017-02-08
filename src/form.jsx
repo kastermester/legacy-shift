@@ -160,7 +160,6 @@ Shift.Form = ShiftForm = React.createClass({
 	</div>],
 
 	getTemplate: function(){
-		var canSubmit = !this.state.submitting;
 		var template = this.props.template || this.props.children || this.defaultTemplate;
 		if(template instanceof Array){
 			template = template.slice(0);
@@ -402,6 +401,11 @@ Shift.Form = ShiftForm = React.createClass({
 			var errorClassName = reactNode.props.errorClassName;
 			var isValid = that.isFieldValid(fieldName);
 
+			var children = reactNode.props.children;
+			if( Object.prototype.toString.call( children ) !== '[object Array]' ) {
+				children = [children];
+			}
+
 			return <ShiftValidationClassStatus
 				tagName={tagName}
 				key={'validation-class-status-' + fieldName}
@@ -411,7 +415,7 @@ Shift.Form = ShiftForm = React.createClass({
 					that.isFieldValid(fieldName)
 				)}
 			>{
-				reactNode.props.children.map(function(child){
+				children.map(function(child){
 					return utils.templateHelper.replaceExplicitFields([], [], function(category){
 						return that.translateCategoryName(category);
 					}, child, result, fieldName, null, that.getFieldValue, that.props.context, that.props.schema, that.isFieldValid, that.getFieldErrorMessage, that);
@@ -525,6 +529,9 @@ Shift.Form = ShiftForm = React.createClass({
 				}, function(error){
 					if(that.mounted){
 						that.setState({submitting: false});
+						if (error && error.fieldErrors) {
+							that.setFieldErrors(error.fieldErrors);
+						}
 					}
 					defer.reject(error);
 				});
@@ -543,6 +550,7 @@ Shift.Form = ShiftForm = React.createClass({
 
 		return defer.promise;
 	},
+
 	hasEvent: function(name){
 		if(this.props.events != null){
 			return typeof(this.props.events[name]) == 'function';
@@ -611,6 +619,20 @@ Shift.Form = ShiftForm = React.createClass({
 		this.triggerEvent('onChange', arguments);
 		this.forceUpdate();
 	},
+
+	setFieldErrors: function(errors) {
+		var fieldErrors = this.getEmptyFieldErrors();
+		var validator = {id: 'dummy_validator'};
+		for (var field in this.props.schema) {
+			var error = errors[field];
+			if (error) {
+				this.setFieldError(field, validator, error, fieldErrors);
+			}
+		}
+		this.setState({fieldErrors: fieldErrors});
+		this.fieldErrors = fieldErrors;
+	},
+
 	// This function is quite complex
 	//
 	// What needs to be done is the following:
@@ -679,7 +701,7 @@ Shift.Form = ShiftForm = React.createClass({
 		var success = function(){
 			if(that.activeValidationPromise == defer.promise){
 				that.setState({fieldErrors: fieldErrors});
-				this.fieldErrors = fieldErrors;
+				that.fieldErrors = fieldErrors;
 				that.activeValidationPromise = null;
 			}
 			defer.resolve();
@@ -687,10 +709,10 @@ Shift.Form = ShiftForm = React.createClass({
 		var fail = function(){
 			if(that.activeValidationPromise == defer.promise){
 				that.setState({fieldErrors: fieldErrors});
-				this.fieldErrors = fieldErrors;
+				that.fieldErrors = fieldErrors;
 				that.activeValidationPromise = null;
 				if(setFocusOnFail){
-					var editor = that.artificialRefs[Object.keys(this.fieldErrors)[0]];
+					var editor = that.artificialRefs[Object.keys(that.fieldErrors)[0]];
 					if (editor.select){
 						editor.select();
 					} else {
@@ -757,7 +779,6 @@ Shift.Form = ShiftForm = React.createClass({
 		}
 
 		var fieldErrors = this.fieldErrors;
-
 
 		var dependentValidators = this.validatorsDependingOnField[field];
 
