@@ -529,6 +529,9 @@ Shift.Form = ShiftForm = React.createClass({
 				}, function(error){
 					if(that.mounted){
 						that.setState({submitting: false});
+						if (error && error.fieldErrors) {
+							that.setFieldErrors(error.fieldErrors);
+						}
 					}
 					defer.reject(error);
 				});
@@ -616,6 +619,20 @@ Shift.Form = ShiftForm = React.createClass({
 		this.triggerEvent('onChange', arguments);
 		this.forceUpdate();
 	},
+
+	setFieldErrors: function(errors) {
+		var fieldErrors = this.getEmptyFieldErrors();
+		var validator = {id: 'dummy_validator'};
+		for (var field in this.props.schema) {
+			var error = errors[field];
+			if (error) {
+				this.setFieldError(field, validator, error, fieldErrors);
+			}
+		}
+		this.setState({fieldErrors: fieldErrors});
+		this.fieldErrors = fieldErrors;
+	},
+
 	// This function is quite complex
 	//
 	// What needs to be done is the following:
