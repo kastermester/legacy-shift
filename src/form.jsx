@@ -684,7 +684,7 @@ Shift.Form = ShiftForm = React.createClass({
 		var success = function(){
 			if(that.activeValidationPromise == defer.promise){
 				that.setState({fieldErrors: fieldErrors});
-				this.fieldErrors = fieldErrors;
+				that.fieldErrors = fieldErrors;
 				that.activeValidationPromise = null;
 			}
 			defer.resolve();
@@ -692,10 +692,10 @@ Shift.Form = ShiftForm = React.createClass({
 		var fail = function(){
 			if(that.activeValidationPromise == defer.promise){
 				that.setState({fieldErrors: fieldErrors});
-				this.fieldErrors = fieldErrors;
+				that.fieldErrors = fieldErrors;
 				that.activeValidationPromise = null;
 				if(setFocusOnFail){
-					var editor = that.artificialRefs[Object.keys(this.fieldErrors)[0]];
+					var editor = that.artificialRefs[Object.keys(that.fieldErrors)[0]];
 					if (editor.select){
 						editor.select();
 					} else {
