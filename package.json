@@ -6,6 +6,9 @@
     "name": "Kaare Skovgaard",
     "email": "kaare@kaareskovgaard.net"
   },
+  "scripts": {
+    "build": "gulp"
+  },
   "devDependencies": {
     "gulp": "=3.9.1",
     "gulp-concat": "=2.6.1",
