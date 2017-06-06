@@ -54,13 +54,13 @@ Shift.Form = ShiftForm = React.createClass({
 	getInitialState: function(){
 		return {
 			fieldInFocus: null,
-			fieldErrors: this.getEmptyFieldErrors(),
+			fieldErrors: this.getEmptyFieldErrors(this.props),
 			submittedOnce: false,
 			presenterValues: this.props.initialValue || {}
 		};
 	},
 
-	getEmptyFieldErrors: function(){
+	getEmptyFieldErrors: function(props){
 		var result = {};
 
 		for(var key in this.props.schema){
@@ -89,22 +89,25 @@ Shift.Form = ShiftForm = React.createClass({
 	componentWillMount: function(){
 		this.artificialRefs = {};
 		this.newValues = {};
+		this.setupValidatorState(this.props);
+	},
+	setupValidatorState: function (props) {
 		this.validators = {};
 		this.validatorsWithDependencies = {};
 		this.validatorsDependingOnField = {};
 		// We save this here as non-state.
 		// React updates the state in some weird asynchronous way
 		// we need a synchronous way of reading the state
-		this.fieldErrors = this.getEmptyFieldErrors();
+		this.fieldErrors = this.getEmptyFieldErrors(props);
 
-		for(var field in this.props.schema){
+		for(var field in props.schema){
 			this.validators[field] = [];
 			this.validatorsDependingOnField[field] = [];
 			this.validatorsWithDependencies[field] = [];
 		}
 
-		for(var field in this.props.schema){
-			var schema = this.props.schema[field];
+		for(var field in props.schema){
+			var schema = props.schema[field];
 			if(schema.validators instanceof Array){
 				var validators = this.normalizeValidators(schema.validators);
 				for(var i in validators){
@@ -510,6 +513,10 @@ Shift.Form = ShiftForm = React.createClass({
 				this.triggerEvent('onSubmitEnd');
 			}
 		}
+
+		if (nextProps.schema !== this.props.schema) {
+			this.setupValidatorState(nextProps);
+		}
 	},
 
 	submit: function(){
@@ -621,7 +628,7 @@ Shift.Form = ShiftForm = React.createClass({
 	},
 
 	setFieldErrors: function(errors) {
-		var fieldErrors = this.getEmptyFieldErrors();
+		var fieldErrors = this.getEmptyFieldErrors(this.props);
 		var validator = {id: 'dummy_validator'};
 		for (var field in this.props.schema) {
 			var error = errors[field];
@@ -652,7 +659,7 @@ Shift.Form = ShiftForm = React.createClass({
 		}
 		var allValidations = [];
 		var fieldValidators = {};
-		var fieldErrors = this.getEmptyFieldErrors();
+		var fieldErrors = this.getEmptyFieldErrors(this.props);
 		var that = this;
 
 		// Run all simple validations
