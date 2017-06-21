@@ -63,7 +63,7 @@ Shift.Form = ShiftForm = React.createClass({
 	getEmptyFieldErrors: function (props) {
 		var result = {};
 
-		for(var key in this.props.schema){
+		for (var key in props.schema) {
 			result[key] = {};
 		}
 
