@@ -1,5 +1,5 @@
 {
-  "name": "Shift",
+  "name": "shift",
   "version": "0.1.0",
   "description": "A framework for displaying data, written using ReactJS",
   "author": {
@@ -7,7 +7,7 @@
     "email": "kaare@kaareskovgaard.net"
   },
   "scripts": {
-    "build": "gulp"
+    "build": "gulp build"
   },
   "devDependencies": {
     "gulp": "=3.9.1",
