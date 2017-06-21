@@ -1,6 +1,6 @@
 Shift.Editors.Text = ShiftTextEditor = React.createClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.disabledEditorSupport, Shift.Mixins.translate],
-	getDefaultProps: function(){
+	getDefaultProps: function () {
 		return {
 			initialValue: '',
 			className: '',
@@ -15,13 +15,13 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		extraClassName: React.PropTypes.string,
 		placeholderText: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object])
 	},
-	getInitialState: function(){
+	getInitialState: function () {
 		return {
 			enabled: true,
 			value: this.props.initialValue
 		}
 	},
-	render: function(){
+	render: function () {
 		return <input
 			type="text"
 			ref="field"
@@ -38,44 +38,44 @@ Shift.Editors.Text = ShiftTextEditor = React.createClass({
 		/>;
 	},
 
-	setValue: function(value){
-		this.setState({value: value});
+	setValue: function (value) {
+		this.setState({ value: value });
 	},
 
-	getValue: function(){
+	getValue: function () {
 		return this.state.value;
 	},
 
-	valueChanged: function(e){
+	valueChanged: function (e) {
 		var oldValue = this.state.value;
 		var newValue = e.target.value;
 
-		if(oldValue != newValue){
-			this.setState({value: newValue}, function(){
+		if (oldValue != newValue) {
+			this.setState({ value: newValue }, function () {
 				this.triggerEvent('onChange', [oldValue, newValue]);
 			});
 		}
 	},
 
-	fieldBlurred: function(){
+	fieldBlurred: function () {
 		this.triggerEvent('onBlur', []);
 	},
 
-	fieldFocused: function(){
+	fieldFocused: function () {
 		this.triggerEvent('onFocus', []);
 	},
 
-	focus: function(){
+	focus: function () {
 		this.refs.field.focus();
 		this.fieldFocused();
 	},
 
-	blur: function(){
+	blur: function () {
 		this.refs.field.blur();
 		this.fieldBlurred();
 	},
 
-	select: function(){
+	select: function () {
 		this.refs.field.select();
 	}
 });

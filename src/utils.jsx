@@ -1,7 +1,7 @@
 var utils = Shift.utils = {
 	async: {
-		whenAll: function(promises){
-			if(!(promises instanceof Array)){
+		whenAll: function (promises) {
+			if (!(promises instanceof Array)) {
 				throw new Error("Shift.async.whenAll: first argument must be an array");
 			}
 			var result = promises.slice();
@@ -9,42 +9,42 @@ var utils = Shift.utils = {
 			var totalDone = 0;
 			var total = result.length;
 			var promiseInResult = false;
-			var checkDone = function(){
-				if(total != totalDone){
+			var checkDone = function () {
+				if (total != totalDone) {
 					return;
 				}
 
-				if(!promiseInResult){
+				if (!promiseInResult) {
 					return defer.resolve(result);
 				}
 
-				utils.async.whenAll(result).then(function(res){
+				utils.async.whenAll(result).then(function (res) {
 					defer.resolve(res);
-				}, function(err){
-					if(defer.promise.state == 'open'){
+				}, function (err) {
+					if (defer.promise.state == 'open') {
 						defer.reject(err);
 					}
 				});
 			};
-			for(var i in promises){
-				(function(i){
+			for (var i in promises) {
+				(function (i) {
 					var promise = promises[i];
-					if(!utils.isPromise(promise)){
+					if (!utils.isPromise(promise)) {
 						result[i] = promise;
 						totalDone++;
 						return;
 					}
 
-					promise.then(function(res){
+					promise.then(function (res) {
 						result[i] = res;
 						totalDone++;
-						if(utils.isPromise(res)){
+						if (utils.isPromise(res)) {
 							promiseInResult = true;
 						}
 
 						checkDone();
-					}, function(err){
-						if(defer.promise.state == 'open'){
+					}, function (err) {
+						if (defer.promise.state == 'open') {
 							defer.reject(err);
 						}
 					});
@@ -55,8 +55,8 @@ var utils = Shift.utils = {
 
 			return defer.promise;
 		},
-		awaitAll: function(promises){
-			if(!(promises instanceof Array)){
+		awaitAll: function (promises) {
+			if (!(promises instanceof Array)) {
 				throw new Error("Shift.async.whenAll: first argument must be an array");
 			}
 			var result = promises.slice();
@@ -65,49 +65,49 @@ var utils = Shift.utils = {
 			var total = result.length;
 			var promiseInResult = false;
 			var resolve = true;
-			var checkDone = function(){
-				if(total != totalDone){
+			var checkDone = function () {
+				if (total != totalDone) {
 					return;
 				}
 
-				if(!promiseInResult){
-					if(resolve){
+				if (!promiseInResult) {
+					if (resolve) {
 						return defer.resolve(result);
 					} else {
 						return defer.reject(result);
 					}
 				}
 
-				Shift.async.awaitAll(result.map(function(e){
-					if(utils.isPromise(e.result)){
+				Shift.async.awaitAll(result.map(function (e) {
+					if (utils.isPromise(e.result)) {
 						return e.result;
 					}
 					return e;
-				})).then(function(res){
+				})).then(function (res) {
 					defer.resolve(res);
-				}, function(res){
+				}, function (res) {
 					defer.reject(res);
 				});
 			};
-			for(var i in promises){
-				(function(i){
+			for (var i in promises) {
+				(function (i) {
 					var promise = promises[i];
-					if(!utils.isPromise(promise)){
+					if (!utils.isPromise(promise)) {
 						result[i] = { resolved: true, result: promise };
 						totalDone++;
 						return;
 					}
 
-					promise.then(function(res){
+					promise.then(function (res) {
 						result[i] = { resolved: true, result: res };
 						totalDone++;
-						if(utils.isPromise(res)){
+						if (utils.isPromise(res)) {
 							promiseInResult = true;
 						}
 
 						checkDone();
-					}, function(err){
-						if(utils.isPromise(err)){
+					}, function (err) {
+						if (utils.isPromise(err)) {
 							result[i] = { resolved: true, result: err };
 						} else {
 							resolve = false;
@@ -124,68 +124,68 @@ var utils = Shift.utils = {
 			return defer.promise;
 		}
 	},
-	isEmptyValue: function(value){
-		if(value == null){
+	isEmptyValue: function (value) {
+		if (value == null) {
 			return true;
 		}
 
-		if(value === ''){
+		if (value === '') {
 			return true;
 		}
 
-		if(value instanceof Array && value.length == 0){
+		if (value instanceof Array && value.length == 0) {
 			return true;
 		}
 
 		return false;
 	},
-	extend: function(){
+	extend: function () {
 		var dst = arguments[0];
 
-		for(var i = 1, n = arguments.length; i < n; i++){
+		for (var i = 1, n = arguments.length; i < n; i++) {
 			var obj = arguments[i];
-			for(var key in obj){
+			for (var key in obj) {
 				dst[key] = obj[key];
 			}
 		}
 
 		return dst;
 	},
-	bind: function(){
-		if(arguments.length < 2){
+	bind: function () {
+		if (arguments.length < 2) {
 			throw new Error("Shift.utils.bind must be called with 2 or more parameters");
 		}
 
 		var fn = [arguments[0]];
 		var args = arguments.slice(1);
 
-		if(typeof(fn) != 'function'){
+		if (typeof (fn) != 'function') {
 			throw new Error("Shift.utils.bind: first argument must be a function");
 		}
 
-		return function(){
+		return function () {
 			Function.call.apply(fn.concat(args).concat(arguments));
 		};
 	},
-	nextTick: function(fn){
-		if(typeof(process) != 'undefined'){
+	nextTick: function (fn) {
+		if (typeof (process) != 'undefined') {
 			process.nextTick(fn)
 		} else {
 			setTimeout(fn, 0);
 		}
 	},
-	isPromise: function(obj){
-		if(obj == null){
+	isPromise: function (obj) {
+		if (obj == null) {
 			return false;
 		}
 
-		return typeof(obj.then) == 'function';
+		return typeof (obj.then) == 'function';
 	},
-	makePromise: function(obj, isFaulty){
+	makePromise: function (obj, isFaulty) {
 		var result;
 		var defer = Shift.defer();
 
-		if(isFaulty){
+		if (isFaulty) {
 			defer.reject(obj);
 		} else {
 			defer.resolve(obj);
@@ -193,25 +193,25 @@ var utils = Shift.utils = {
 
 		return defer.promise;
 	},
-	ensurePromise: function(fn){
+	ensurePromise: function (fn) {
 		try {
 			var result = fn();
-			if(utils.isPromise(result)){
+			if (utils.isPromise(result)) {
 				return result;
 			}
 
 			return utils.makePromise(result, false);
-		} catch(err){
+		} catch (err) {
 			return utils.makePromise(err, true);
 		}
 	},
-	mergeClassNames: function(){
+	mergeClassNames: function () {
 		args = arguments
 		classNames = {};
-		for(var i = 0, n = args.length; i < n; i++){
+		for (var i = 0, n = args.length; i < n; i++) {
 			classes = args[i].split(' ');
-			for(var j = 0, m = classes.length; j < m; j++){
-				if(classes[j].length == 0){
+			for (var j = 0, m = classes.length; j < m; j++) {
+				if (classes[j].length == 0) {
 					continue;
 				}
 				classNames[classes[j]] = true;
@@ -219,38 +219,38 @@ var utils = Shift.utils = {
 		}
 		return Object.keys(classNames).join(' ');
 	},
-	maybeAppendErrorClassNames: function(className, errorClassName, isValid){
+	maybeAppendErrorClassNames: function (className, errorClassName, isValid) {
 		var result = [];
-		if (typeof(className) == 'string' && className.length > 0){
+		if (typeof (className) == 'string' && className.length > 0) {
 			result.push(className);
 		}
 
-		if(typeof(errorClassName) == 'string' && errorClassName.length > 0 && !isValid){
+		if (typeof (errorClassName) == 'string' && errorClassName.length > 0 && !isValid) {
 			result.push(errorClassName);
 		}
 
 		return result.join(' ');
 	},
-	unwrapEditor: function(editor){
-		if (typeof(editor) == 'string'){
+	unwrapEditor: function (editor) {
+		if (typeof (editor) == 'string') {
 			return Shift.Editors[editor];
 		}
 
 		return editor;
 	},
-	unwrapPresenter: function(presenter){
-		if (typeof(presenter) == 'string'){
+	unwrapPresenter: function (presenter) {
+		if (typeof (presenter) == 'string') {
 			return Shift.Presenters[presenter];
 		}
 
 		return presenter;
 	},
-	getIn: function(val, key){
-		if(val == null){
+	getIn: function (val, key) {
+		if (val == null) {
 			return;
 		}
 
-		if(Object.hasOwnProperty.call(val, key)){
+		if (Object.hasOwnProperty.call(val, key)) {
 			return val[key];
 		}
 
@@ -258,7 +258,7 @@ var utils = Shift.utils = {
 
 		var ret = val[keys[0]];
 
-		if (ret == null){
+		if (ret == null) {
 			return;
 		}
 

@@ -1,34 +1,34 @@
-Shift.Deferred = function(){
+Shift.Deferred = function () {
 	this.promise = new Shift.Promise();
 };
 
-Shift.Deferred.prototype.resolve = function(obj){
+Shift.Deferred.prototype.resolve = function (obj) {
 	this.promise.become(obj);
 };
 
-Shift.Deferred.prototype.reject = function(obj){
+Shift.Deferred.prototype.reject = function (obj) {
 	this.promise.become(obj, true);
 };
 
-Shift.defer = function(){
+Shift.defer = function () {
 	return new Shift.Deferred();
 };
 
-Shift.Promise = function(){
+Shift.Promise = function () {
 	this.fulfilledHandlers = [];
 	this.rejectedHandlers = [];
 	this.state = 'open';
 };
 
-Shift.Promise.prototype.become = function(obj, isRejected){
-	if(this.state != 'open'){
+Shift.Promise.prototype.become = function (obj, isRejected) {
+	if (this.state != 'open') {
 		throw new Error("Promise cannot become anything unless it is in the open state");
 	}
-	if(utils.isPromise(obj)){
+	if (utils.isPromise(obj)) {
 		var that = this;
-		obj.then(function(res){
+		obj.then(function (res) {
 			that.become(res);
-		}, function(res){
+		}, function (res) {
 			that.become(res, true);
 		});
 	} else {
@@ -39,19 +39,19 @@ Shift.Promise.prototype.become = function(obj, isRejected){
 	}
 };
 
-Shift.Promise.prototype.runBoundHandlers = function(){
+Shift.Promise.prototype.runBoundHandlers = function () {
 	var handlers;
-	if(this.state == 'resolved'){
+	if (this.state == 'resolved') {
 		handlers = this.fulfilledHandlers;
-	} else if(this.state == 'rejected'){
+	} else if (this.state == 'rejected') {
 		handlers = this.rejectedHandlers;
 	} else {
 		throw new Error('Cannot call runBoundHandlers for a promise that is open');
 	}
 	var value = this.value;
 
-	utils.nextTick(function(){
-		for(var i in handlers){
+	utils.nextTick(function () {
+		for (var i in handlers) {
 			var handler = handlers[i];
 			handler.call(undefined, value);
 		}
@@ -60,41 +60,41 @@ Shift.Promise.prototype.runBoundHandlers = function(){
 	this.rejectedHandlers = null;
 }
 
-Shift.Promise.prototype.then = function(onFulfilled, onRejected){
+Shift.Promise.prototype.then = function (onFulfilled, onRejected) {
 	var fulfill, reject;
-	if(this.state == 'open'){
-		fulfill = typeof(onFulfilled) == 'function';
-		reject = typeof(onRejected) == 'function';
-		if(fulfill || reject){
+	if (this.state == 'open') {
+		fulfill = typeof (onFulfilled) == 'function';
+		reject = typeof (onRejected) == 'function';
+		if (fulfill || reject) {
 			var newPromise = new Shift.Promise();
 
-			if(!fulfill){
-				onFulfilled = function(obj){
+			if (!fulfill) {
+				onFulfilled = function (obj) {
 					newPromise.become(obj);
 				}
 			} else {
 				var origFulfill = onFulfilled;
-				onFulfilled = function(obj){
+				onFulfilled = function (obj) {
 					try {
 						obj = origFulfill.call(undefined, obj);
 						newPromise.become(obj);
-					} catch(err){
+					} catch (err) {
 						newPromise.become(err, true);
 					}
 				};
 			}
 
-			if(!reject){
-				onRejected = function(obj){
+			if (!reject) {
+				onRejected = function (obj) {
 					newPromise.become(obj, true);
 				};
 			} else {
 				var origReject = onRejected;
-				onRejected = function(obj){
+				onRejected = function (obj) {
 					try {
 						obj = origReject.call(undefined, obj);
 						newPromise.become(obj);
-					} catch (err){
+					} catch (err) {
 						newPromise.become(err, true);
 					}
 				};
@@ -108,24 +108,24 @@ Shift.Promise.prototype.then = function(onFulfilled, onRejected){
 		newPromise = new Shift.Promise();
 		var value = this.value;
 		var state = this.state;
-		utils.nextTick(function(){
+		utils.nextTick(function () {
 			var res = value;
 			var faulty = state == 'rejected';
-			if(state == 'resolved'){
-				if(typeof(onFulfilled) == 'function'){
+			if (state == 'resolved') {
+				if (typeof (onFulfilled) == 'function') {
 					try {
 						res = onFulfilled.call(undefined, value);
-					} catch(err){
+					} catch (err) {
 						res = err;
 						faulty = true;
 					}
 				}
 			} else {
-				if(typeof(onRejected) == 'function'){
+				if (typeof (onRejected) == 'function') {
 					try {
 						res = onRejected.call(undefined, value);
 						faulty = false;
-					} catch(err){
+					} catch (err) {
 						res = err;
 						faulty = true;
 					}
@@ -139,6 +139,6 @@ Shift.Promise.prototype.then = function(onFulfilled, onRejected){
 	}
 };
 
-Shift.Promise.prototype.fail = function(onRejected){
+Shift.Promise.prototype.fail = function (onRejected) {
 	this.then(undefined, onRejected);
 };

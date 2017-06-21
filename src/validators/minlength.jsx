@@ -1,11 +1,11 @@
-Shift.Validators.minlength = function(value, params){
+Shift.Validators.minlength = function (value, params) {
 	var defer = Shift.defer();
-	setTimeout(function(){
-		if(utils.isEmptyValue(value)){
+	setTimeout(function () {
+		if (utils.isEmptyValue(value)) {
 			return defer.resolve();
 		}
 
-		if(value.length < params.length){
+		if (value.length < params.length) {
 			return defer.reject(params.errorMessage || 'Minimum length: ' + params.length);
 		}
 		defer.resolve();
