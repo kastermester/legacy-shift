@@ -1,19 +1,19 @@
 Shift.Editors = {}
 
 Shift.Editor = ShiftEditor = React.createClass({
-	componentDidMount: function(){
+	componentDidMount: function () {
 		this.props.addRef(this.props.fieldName, this.refs.editor);
 	},
-	componentWillUnmount: function(){
+	componentWillUnmount: function () {
 		this.props.removeRef(this.props.fieldName, this.props.clearValueOnUnmount);
 	},
-	getEditor: function(){
+	getEditor: function () {
 		return this.refs.editor;
 	},
-	render: function(){
-		var props = utils.extend({}, this.props, {ref: 'editor'});
+	render: function () {
+		var props = utils.extend({}, this.props, { ref: 'editor' });
 		var initVal = this.props.initialValue();
-		if (initVal !== undefined){
+		if (initVal !== undefined) {
 			props.initialValue = initVal;
 		} else {
 			delete props.initialValue;
