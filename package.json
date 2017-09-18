@@ -1,19 +1,21 @@
 {
-  "name": "shift",
-  "version": "0.1.0",
-  "description": "A framework for displaying data, written using ReactJS",
-  "author": {
-    "name": "Kaare Skovgaard",
-    "email": "kaare@kaareskovgaard.net"
-  },
-  "scripts": {
-    "build": "gulp build"
-  },
-  "devDependencies": {
-    "gulp": "=3.9.1",
-    "gulp-concat": "=2.6.1",
-    "gulp-react": "=3.1.0",
-    "serve": "=2.4.2"
-  },
-  "dependencies": {}
+	"name": "shift",
+	"version": "0.1.0",
+	"description": "A framework for displaying data, written using ReactJS",
+	"author": {
+		"name": "Kaare Skovgaard",
+		"email": "kaare@kaareskovgaard.net"
+	},
+	"scripts": {
+		"build": "gulp build",
+		"fmt": "prettier --write 'src/**/*.jsx'"
+	},
+	"devDependencies": {
+		"gulp": "3.9.1",
+		"gulp-concat": "2.6.1",
+		"gulp-react": "3.1.0",
+		"prettier": "1.7.0",
+		"serve": "6.1.0"
+	},
+	"dependencies": {}
 }
