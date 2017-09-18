@@ -140,6 +140,11 @@ Shift.Presenter = ShiftPresenter = React.createClass({
 		result.push(Shift.PresenterFor);
 		result.push(function(fieldName, reactNode) {
 			var field = that.props.schema[fieldName];
+			if (field == null) {
+				// If the field is not in the schema, warn and don't render
+				console.warn('Field ' + fieldName + ' is not available in schema');
+				return null;
+			}
 			var origProps = utils.extend({}, reactNode.props);
 			delete origProps.field;
 			return React.createElement(
