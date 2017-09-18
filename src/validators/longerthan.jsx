@@ -1,4 +1,4 @@
-Shift.Validators.longerThan = function (value, params, deps) {
+Shift.Validators.longerThan = function(value, params, deps) {
 	if (value.length > deps.other.length) {
 		return;
 	}

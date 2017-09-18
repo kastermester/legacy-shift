@@ -1,6 +1,6 @@
-Shift.Validators.minlength = function (value, params) {
+Shift.Validators.minlength = function(value, params) {
 	var defer = Shift.defer();
-	setTimeout(function () {
+	setTimeout(function() {
 		if (utils.isEmptyValue(value)) {
 			return defer.resolve();
 		}
