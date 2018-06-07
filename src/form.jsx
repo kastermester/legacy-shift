@@ -766,13 +766,21 @@ Shift.Form = ShiftForm = React.createClass({
 
 							allValidations.push(
 								utils.async.whenAll(deps).then(function() {
-									return utils
+									var defer = Shift.defer();
+									utils
 										.ensurePromise(function() {
 											return validator.validate(fieldValue, dependencyValues);
 										})
-										.fail(function(error) {
-											that.setFieldError(field, validator, error, fieldErrors);
-										});
+										.then(
+											function() {
+												defer.resolve();
+											},
+											function(error) {
+												that.setFieldError(field, validator, error, fieldErrors);
+												defer.reject();
+											}
+										);
+									return defer.promise;
 								})
 							);
 						}.call(this, i));
