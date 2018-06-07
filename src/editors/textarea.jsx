@@ -1,4 +1,4 @@
-Shift.Editors.TextArea = ShiftTextAreaEditor = React.createClass({
+Shift.Editors.TextArea = ShiftTextAreaEditor = createReactClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.disabledEditorSupport, Shift.Mixins.translate],
 	getDefaultProps: function() {
 		return {
@@ -10,10 +10,10 @@ Shift.Editors.TextArea = ShiftTextAreaEditor = React.createClass({
 		};
 	},
 	propTypes: {
-		initialValue: React.PropTypes.string,
-		className: React.PropTypes.string,
-		extraClassName: React.PropTypes.string,
-		placeholderText: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+		initialValue: PropTypes.string,
+		className: PropTypes.string,
+		extraClassName: PropTypes.string,
+		placeholderText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 	},
 	getInitialState: function() {
 		return {

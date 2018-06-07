@@ -1,4 +1,4 @@
-Shift.Presenters.Text = ShiftTextPresenter = React.createClass({
+Shift.Presenters.Text = ShiftTextPresenter = createReactClass({
 	getDefaultProps: function() {
 		return {
 			value: '',

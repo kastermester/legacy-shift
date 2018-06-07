@@ -2,9 +2,9 @@ return Shift;
 });
 
 if (typeof define === "function" && define.amd) {
-	define("shift", ["react"], function (React) {
-		return load(window, React);
+	define("shift", ["react", "create-react-class", "prop-types", "react-dom-factories"], function (React, createReactClass, PropTypes, DOM) {
+		return load(window, React, createReactClass, PropTypes, DOM);
 	});
 } else {
-	load(window, React);
+	throw new Error('`define` not defined');
 }

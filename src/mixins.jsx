@@ -24,7 +24,7 @@ Shift.Mixins = {
 	},
 	disabledEditorSupport: {
 		propTypes: {
-			disabled: React.PropTypes.bool,
+			disabled: PropTypes.bool,
 		},
 		getInitialState: function() {
 			return { disabled: false };

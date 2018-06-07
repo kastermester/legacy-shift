@@ -1,4 +1,4 @@
-Shift.EditorFor = ShiftEditorFor = React.createClass({
+Shift.EditorFor = ShiftEditorFor = createReactClass({
 	getDefaultProps: function() {
 		return {
 			clearValueOnUnmount: false,
@@ -8,29 +8,29 @@ Shift.EditorFor = ShiftEditorFor = React.createClass({
 		throw new Error('Should not be rendered');
 	},
 });
-Shift.ValidationMessageFor = ShiftValidationMessageFor = React.createClass({
+Shift.ValidationMessageFor = ShiftValidationMessageFor = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
-Shift.IfEditValueForEquals = ShiftIfValueForEquals = React.createClass({
+Shift.IfEditValueForEquals = ShiftIfValueForEquals = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
 
-Shift.Form = ShiftForm = React.createClass({
+Shift.Form = ShiftForm = createReactClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
 	propTypes: {
-		events: React.PropTypes.shape({
-			onSubmit: React.PropTypes.function,
-			onChange: React.PropTypes.function,
-			onFieldInFocusChange: React.PropTypes.function,
-			onSubmitBegin: React.PropTypes.function,
-			onSubmitEnd: React.PropTypes.function,
+		events: PropTypes.shape({
+			onSubmit: PropTypes.function,
+			onChange: PropTypes.function,
+			onFieldInFocusChange: PropTypes.function,
+			onSubmitBegin: PropTypes.function,
+			onSubmitEnd: PropTypes.function,
 		}),
-		fields: React.PropTypes.arrayOf(React.PropTypes.string),
-		submitButtonId: React.PropTypes.string,
+		fields: PropTypes.arrayOf(PropTypes.string),
+		submitButtonId: PropTypes.string,
 	},
 	getDefaultProps: function() {
 		return {

@@ -561,7 +561,7 @@ utils.templateHelper.replaceImplicitFields = function(
 		if (typeof categoryName != 'string') {
 			throw new Error('CategoryNameFor must be used inside a CategoryFor node, and outside a FieldsFor node');
 		}
-		return React.DOM[reactNode.props.tagName || 'span'](null, convertCategoryName(categoryName));
+		return DOM[reactNode.props.tagName || 'span'](null, convertCategoryName(categoryName));
 	} else {
 		var children;
 		if (['number', 'string', 'boolean'].indexOf(typeof reactNode) >= 0) {
@@ -628,35 +628,35 @@ utils.templateHelper.forEachEditor = function(node, callback) {
 	}
 };
 
-Shift.FieldsFor = ShiftFieldsFor = React.createClass({
+Shift.FieldsFor = ShiftFieldsFor = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
-Shift.CategoryFor = ShiftCategoryFor = React.createClass({
+Shift.CategoryFor = ShiftCategoryFor = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
-Shift.CategoryNameFor = ShiftCategoryNameFor = React.createClass({
-	render: function() {
-		throw new Error('Should not be rendered');
-	},
-});
-
-Shift.PassFieldProperties = ShiftPassFieldProperties = React.createClass({
+Shift.CategoryNameFor = ShiftCategoryNameFor = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
 
-Shift.PassFormProperties = ShiftPassFormProperties = React.createClass({
+Shift.PassFieldProperties = ShiftPassFieldProperties = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
 });
 
-Shift.PassPresenterProperties = ShiftPassPresenterProperties = React.createClass({
+Shift.PassFormProperties = ShiftPassFormProperties = createReactClass({
+	render: function() {
+		throw new Error('Should not be rendered');
+	},
+});
+
+Shift.PassPresenterProperties = ShiftPassPresenterProperties = createReactClass({
 	render: function() {
 		throw new Error('Should not be rendered');
 	},
