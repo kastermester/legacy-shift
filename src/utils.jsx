@@ -1,143 +1,43 @@
 var utils = (Shift.utils = {
 	async: {
 		whenAll: function(promises) {
-			if (!(promises instanceof Array)) {
-				throw new Error('Shift.async.whenAll: first argument must be an array');
-			}
-			var result = promises.slice();
-			var defer = Shift.defer();
-			var totalDone = 0;
-			var total = result.length;
-			var promiseInResult = false;
-			var checkDone = function() {
-				if (total != totalDone) {
-					return;
-				}
-
-				if (!promiseInResult) {
-					return defer.resolve(result);
-				}
-
-				utils.async.whenAll(result).then(
-					function(res) {
-						defer.resolve(res);
-					},
-					function(err) {
-						if (defer.promise.state == 'open') {
-							defer.reject(err);
-						}
-					}
-				);
-			};
-			for (var i in promises) {
-				(function(i) {
-					var promise = promises[i];
-					if (!utils.isPromise(promise)) {
-						result[i] = promise;
-						totalDone++;
-						return;
-					}
-
-					promise.then(
-						function(res) {
-							result[i] = res;
-							totalDone++;
-							if (utils.isPromise(res)) {
-								promiseInResult = true;
-							}
-
-							checkDone();
-						},
-						function(err) {
-							if (defer.promise.state == 'open') {
-								defer.reject(err);
-							}
-						}
-					);
-				})(i);
-			}
-
-			checkDone();
-
-			return defer.promise;
+			return Promise.all(promises);
 		},
 		awaitAll: function(promises) {
-			if (!(promises instanceof Array)) {
-				throw new Error('Shift.async.whenAll: first argument must be an array');
-			}
-			var result = promises.slice();
-			var defer = Shift.defer();
-			var totalDone = 0;
-			var total = result.length;
-			var promiseInResult = false;
-			var resolve = true;
-			var checkDone = function() {
-				if (total != totalDone) {
-					return;
-				}
-
-				if (!promiseInResult) {
-					if (resolve) {
-						return defer.resolve(result);
-					} else {
-						return defer.reject(result);
-					}
-				}
-
-				Shift.async
-					.awaitAll(
-						result.map(function(e) {
-							if (utils.isPromise(e.result)) {
-								return e.result;
-							}
-							return e;
-						})
-					)
-					.then(
-						function(res) {
-							defer.resolve(res);
-						},
-						function(res) {
-							defer.reject(res);
+			return new Promise((resolve, reject) => {
+				Promise.all(
+					promises.map(promise => {
+						if (Shift.utils.isPromise(promise)) {
+							return new Promise(resolveInner => {
+								promise.then(
+									r => {
+										resolveInner({ value: r, failed: false });
+									},
+									e => {
+										resolveInner({ value: e, failed: true });
+									}
+								);
+							});
+						} else {
+							return { value: promise, failed: false };
 						}
-					);
-			};
-			for (var i in promises) {
-				(function(i) {
-					var promise = promises[i];
-					if (!utils.isPromise(promise)) {
-						result[i] = { resolved: true, result: promise };
-						totalDone++;
-						return;
-					}
-
-					promise.then(
-						function(res) {
-							result[i] = { resolved: true, result: res };
-							totalDone++;
-							if (utils.isPromise(res)) {
-								promiseInResult = true;
-							}
-
-							checkDone();
-						},
-						function(err) {
-							if (utils.isPromise(err)) {
-								result[i] = { resolved: true, result: err };
-							} else {
-								resolve = false;
-								result[i] = { resolved: false, result: err };
-							}
-							totalDone++;
-							checkDone();
+					})
+				).then(
+					results => {
+						const values = results.map(result => result.value);
+						const failed = results.findIndex(result => result.failed) >= 0;
+						if (failed) {
+							reject(values);
+						} else {
+							resolve(values);
 						}
-					);
-				})(i);
-			}
-
-			checkDone();
-
-			return defer.promise;
+					},
+					err => {
+						console.error('This should never fail: ', err);
+						reject(Array(promises.length));
+					}
+				);
+			});
 		},
 	},
 	isEmptyValue: function(value) {
@@ -198,16 +98,13 @@ var utils = (Shift.utils = {
 		return typeof obj.then == 'function';
 	},
 	makePromise: function(obj, isFaulty) {
-		var result;
-		var defer = Shift.defer();
-
-		if (isFaulty) {
-			defer.reject(obj);
-		} else {
-			defer.resolve(obj);
-		}
-
-		return defer.promise;
+		return new Promise((resolve, reject) => {
+			if (isFaulty) {
+				reject(obj);
+			} else {
+				resolve(obj);
+			}
+		});
 	},
 	ensurePromise: function(fn) {
 		try {
@@ -215,7 +112,6 @@ var utils = (Shift.utils = {
 			if (utils.isPromise(result)) {
 				return result;
 			}
-
 			return utils.makePromise(result, false);
 		} catch (err) {
 			return utils.makePromise(err, true);
