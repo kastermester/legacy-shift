@@ -23,11 +23,11 @@ Shift.Form = ShiftForm = createReactClass({
 	mixins: [Shift.Mixins.events, Shift.Mixins.translate],
 	propTypes: {
 		events: PropTypes.shape({
-			onSubmit: PropTypes.function,
-			onChange: PropTypes.function,
-			onFieldInFocusChange: PropTypes.function,
-			onSubmitBegin: PropTypes.function,
-			onSubmitEnd: PropTypes.function,
+			onSubmit: PropTypes.func,
+			onChange: PropTypes.func,
+			onFieldInFocusChange: PropTypes.func,
+			onSubmitBegin: PropTypes.func,
+			onSubmitEnd: PropTypes.func,
 		}),
 		fields: PropTypes.arrayOf(PropTypes.string),
 		submitButtonId: PropTypes.string,
